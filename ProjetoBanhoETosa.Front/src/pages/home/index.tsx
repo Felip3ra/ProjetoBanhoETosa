@@ -7,7 +7,7 @@ export default function Home(){
     
     return(
         <div className="bg-[#f9fafb] pb-2">
-            <Header/>
+            
             <CalendarView/>
             
         </div>
