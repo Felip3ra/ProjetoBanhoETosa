@@ -9,6 +9,7 @@ export interface Appointment {
   time: string; // HH:mm
   phone: string;
   price: number;
+  paymentMethod: string;
 }
 
 interface AddAppointmentModalProps {
@@ -81,18 +82,38 @@ const AddAppointmentModal: React.FC<AddAppointmentModalProps> = ({
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Preço</label>
-            <div className="relative">
-              <span className="absolute left-3 top-2 text-gray-500">R$</span>
-              <input
-                type="number"
-                value={newAppointment.price}
-                onChange={(e) => setNewAppointment({ ...newAppointment, price: parseFloat(e.target.value) || 0 })}
-                className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                step="0.01"
-              />
-            </div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Forma de Pagamento</label>
+            <select
+              value={newAppointment.service}
+              onChange={(e) => handleServiceChange(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
+              <option>PIX</option>
+              <option>Dinheiro</option>
+              <option>Cartão de Débito</option>
+              <option>Cartão de Crédito</option>
+              <option>Plano Mensal</option>
+
+            </select>
           </div>
+
+          <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Preço</label>
+                <div className="relative">
+                  <span className="absolute left-3 top-2 text-gray-500">R$</span>
+                  <input
+                    type="number"
+                    value={newAppointment.price}
+                    onChange={(e) => setNewAppointment({ ...newAppointment, price: parseFloat(e.target.value) || 0 })}
+                    className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    step="0.01"
+                    disabled={newAppointment.paymentMethod === 'plano'}
+                  />
+                </div>
+                {newAppointment.paymentMethod === 'plano' && (
+                  <p className="text-xs text-purple-600 mt-1">Valor coberto pelo plano mensal</p>
+                )}
+              </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Data</label>

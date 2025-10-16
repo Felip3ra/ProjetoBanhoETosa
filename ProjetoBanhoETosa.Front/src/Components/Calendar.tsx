@@ -17,6 +17,8 @@ import MonthResume from "./MonthResume";
 import PricingList from "./PricingList";
 import AmountMothServices from "./AmountMothServices";
 import Header from "./Header";
+import EditingPriceServices from "./modals/EditingPriceServices";
+import PlanManagement from "./modals/PlanManagement";
 interface Appointment {
   id: number;
   petName: string;
@@ -355,7 +357,7 @@ export default function CalendarView() {
         <div className="space-y-6">
 
           <MonthResume AmountPets={monthAppointments.length} Revenue={totalMonthRevenue}/>
-          <PricingList services={services}/>
+          <PricingList services={services} OpenModalEdit={() => setShowEditPricesModal(true)}/>
           <AmountMothServices MonthAppointments={monthAppointments}/>
         </div>
         
@@ -371,162 +373,25 @@ export default function CalendarView() {
   handleServiceChange={handleServiceChange}
 />
       {/*MODAL DE EDICAO DE PRECO*/}
-      {ShowEditPricesModal && (
-        <div className="fixed inset-0 flex items-center justify-center p-4 z-[99999]" onClick={() => setShowEditPricesModal(false)}>
-          <div className="absolute inset-0 bg-black opacity-50"></div>
-          <div className="relative bg-white rounded-xl shadow-2xl p-6 w-full max-w-md max-h-screen overflow-y-auto" onClick={(e) => e.stopPropagation()}>
-            <h3 className="text-xl font-bold text-gray-800 mb-4">Editar Preços dos Serviços</h3>
-            <div className="space-y-4">
-              {services.map(service => (
-                <div key={service.id} className="p-4 border border-gray-200 rounded-lg">
-                  <div className="flex items-center justify-between mb-2">
-                    <h4 className="font-semibold text-gray-800">{service.name}</h4>
-                    <span className="text-sm text-gray-500">{service.duration} min</span>
-                  </div>
-                  {editingService === service.id ? (
-                    <div className="space-y-2">
-                      <div className="relative">
-                        <span className="absolute left-3 top-2 text-gray-500">R$</span>
-                        <input
-                          type="number"
-                          value={tempPrice}
-                          onChange={(e) => setTempPrice(e.target.value)}
-                          className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                          step="0.01"
-                          placeholder={service.price.toFixed(2)}
-                          autoFocus
-                        />
-                      </div>
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => handleUpdateServicePrice(service.id)}
-                          className="flex-1 flex items-center justify-center gap-1 px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm"
-                        >
-                          <Check className="w-4 h-4" />
-                          Salvar
-                        </button>
-                        <button
-                          onClick={() => {
-                            setEditingService(null);
-                            setTempPrice('');
-                          }}
-                          className="flex-1 px-3 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-sm"
-                        >
-                          Cancelar
-                        </button>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="flex items-center justify-between">
-                      <span className="text-2xl font-bold text-purple-600">R$ {service.price.toFixed(2)}</span>
-                      <button
-                        onClick={() => {
-                          setEditingService(service.id);
-                          setTempPrice(service.price.toString());
-                        }}
-                        className="flex items-center gap-1 px-3 py-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors text-sm"
-                      >
-                        <Edit2 className="w-4 h-4" />
-                        Editar
-                      </button>
-                    </div>
-                  )}
-                </div>
-              ))}
-              <button
-                onClick={() => setShowEditPricesModal(false)}
-                className="w-full px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors mt-4"
-              >
-                Fechar
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      
+{ShowEditPricesModal && (
+  <EditingPriceServices
+    services={services}
+    onClose={() => setShowEditPricesModal(false)}
+    onSave={(serviceId, newPrice) => {
+      setServices(prev => prev.map(s => s.id === serviceId ? { ...s, price: newPrice } : s));
+    }}
+  />
+)}
+
       {/*MODAL DE PLANOS */}
       {showSubscriptionsModal && (
-        <div className="fixed inset-0 flex items-center justify-center p-4 z-[99999]" onClick={() => setShowSubscriptionsModal(false)}>
-          <div className="absolute bg-black opacity-50 inset-0"></div>
-          <div className="relative bg-white rounded-xl shadow-2xl p-6 w-full max-w-2xl max-h-screen overflow-y-auto" onClick={(e) => e.stopPropagation()}>
-            <h3 className="text-xl font-bold text-gray-800 mb-4">Gerenciar Planos Mensais</h3>
-            <div className="space-y-4">
-              {subscriptions.map(sub => {
-                const daysLeft = Math.ceil((new Date(sub.endDate) - new Date()) / (1000 * 60 * 60 * 24));
-                const isExpiring = daysLeft <= 7 && daysLeft >= 0;
-                const isExpired = daysLeft < 0;
-                
-                return (
-                  <div key={sub.id} className={`p-4 border-2 rounded-lg ${
-                    isExpired ? 'border-red-300 bg-red-50' :
-                    isExpiring ? 'border-yellow-300 bg-yellow-50' :
-                    'border-green-300 bg-green-50'
-                  }`}>
-                    <div className="flex items-start justify-between mb-3">
-                      <div>
-                        <h4 className="font-bold text-gray-800 text-lg">{sub.customerName}</h4>
-                        <p className="text-sm text-gray-600">{sub.planName}</p>
-                      </div>
-                      <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                        sub.paymentStatus === 'pago' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'
-                      }`}>
-                        {sub.paymentStatus.toUpperCase()}
-                      </span>
-                    </div>
-                    
-                    <div className="grid grid-cols-2 gap-3 text-sm mb-3">
-                      <div>
-                        <span className="text-gray-600">Início:</span>
-                        <span className="font-semibold ml-1">{new Date(sub.startDate).toLocaleDateString('pt-BR')}</span>
-                      </div>
-                      <div>
-                        <span className="text-gray-600">Término:</span>
-                        <span className="font-semibold ml-1">{new Date(sub.endDate).toLocaleDateString('pt-BR')}</span>
-                      </div>
-                      <div>
-                        <span className="text-gray-600">Serviços:</span>
-                        <span className="font-semibold ml-1">{sub.servicesUsed}/{sub.servicesAvailable}</span>
-                      </div>
-                      <div>
-                        <span className="text-gray-600">Valor:</span>
-                        <span className="font-semibold ml-1 text-green-600">R$ {sub.price.toFixed(2)}</span>
-                      </div>
-                    </div>
-                    
-                    {isExpiring && sub.paymentStatus === 'pendente' && (
-                      <div className="flex items-center gap-2 text-yellow-700 text-sm mb-2">
-                        <AlertCircle className="w-4 h-4" />
-                        <span>Expira em {daysLeft} {daysLeft === 1 ? 'dia' : 'dias'}</span>
-                      </div>
-                    )}
-                    
-                    {isExpired && (
-                      <div className="flex items-center gap-2 text-red-700 text-sm mb-2">
-                        <AlertCircle className="w-4 h-4" />
-                        <span>Vencido há {Math.abs(daysLeft)} {Math.abs(daysLeft) === 1 ? 'dia' : 'dias'}</span>
-                      </div>
-                    )}
-                    
-                    {sub.paymentStatus === 'pendente' && (
-                      <button
-                        onClick={() => handleConfirmSubscriptionPayment(sub.id)}
-                        className="w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-semibold"
-                      >
-                        Confirmar Pagamento
-                      </button>
-                    )}
-                  </div>
-                );
-              })}
-              <button
-                onClick={() => setShowSubscriptionsModal(false)}
-                className="w-full px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors mt-4"
-              >
-                Fechar
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+  <PlanManagement
+    subscriptions={subscriptions}
+    onClose={() => setShowSubscriptionsModal(false)}
+    onConfirmPayment={handleConfirmSubscriptionPayment}
+  />
+)}
     </div>
     </div>
   );
