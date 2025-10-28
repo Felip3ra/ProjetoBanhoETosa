@@ -1,5 +1,5 @@
 import React from "react";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle,Plus } from "lucide-react";
 
 type Subscription = {
   id: number;
@@ -29,7 +29,16 @@ export default function PlanManagement({ subscriptions, onClose, onConfirmPaymen
         role="dialog"
         aria-modal="true"
       >
-        <h3 className="text-xl font-bold text-gray-800 mb-4">Gerenciar Planos Mensais</h3>
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-xl font-bold text-gray-800 text-center">Gerenciar Planos Mensais</h3>
+          <button
+        
+        className="flex items-center gap-2 bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+      >
+        <Plus className="w-4 h-4" />
+        Novo Plano
+      </button>
+        </div>
         <div className="space-y-4">
           {subscriptions.map((sub) => {
             const daysLeft = Math.ceil((new Date(sub.endDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
