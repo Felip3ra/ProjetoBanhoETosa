@@ -1,10 +1,7 @@
 import { Dog, User, LogOut,Edit2,CreditCard } from "lucide-react";
 import { useState } from "react";
-import styles from "../Components/Header.module.css";
-interface HeaderProps {
-  onEditPrices: () => void;
-  onShowPlans: () => void;
-}
+import styles from "./Header.module.css";
+import type { HeaderProps } from "../../interfaces/Header";
 export default function Header({onEditPrices,onShowPlans} : HeaderProps) {
      
 
@@ -43,7 +40,7 @@ const [subscriptions, setSubscriptions] = useState([
               <CreditCard className={styles['btn-Show-Plans-icon']} />
               <span>Planos</span>
               {expiringSubscriptions.length > 0 && (
-                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                <span className={styles['Notification-Badge']}>
                   {expiringSubscriptions.length}
                 </span>
               )}

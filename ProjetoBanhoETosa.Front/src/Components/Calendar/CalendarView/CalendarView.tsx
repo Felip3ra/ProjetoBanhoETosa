@@ -1,15 +1,16 @@
 import React, { useState } from "react";
-import CalendarHeader from "./CalendarHeader";
-import CalendarGrid from "./CalendarGrid";
-import AppointmentList from "./AppointmentList";
-import type { Appointment } from "./type";
-import AddAppointmentModal from "../modals/AddAppointmentModal";
-import EditingPriceServices from "../modals/EditingPriceServices";
-import PlanManagement from "../modals/PlanManagement";
-import MonthResume from "../MonthResume";
-import PricingList from "../PricingList";
-import AmountMothServices from "../modals/AmountMothServices";
-import Header from "../Header";
+import CalendarHeader from "../CalendarHeader/CalendarHeader";
+import CalendarGrid from "../CalendarGrid/CalendarGrid";
+import AppointmentList from "../../AppointmentList/AppointmentList";
+import type { Appointment } from "../../../interfaces/Appointment";
+import AddAppointmentModal from "../../modals/AddAppointmentModal/AddAppointmentModal";
+import EditingPriceServices from "../../modals/EditingPriceServices/EditingPriceServices";
+import PlanManagement from "../../modals/PlanManagement/PlanManagement";
+import MonthResume from "../../MonthResume/MonthResume";
+import PricingList from "../../PricingList/PricingList";
+import AmountMothServices from "../../modals/AmountMonthServices/AmountMonthServices";
+import Header from "../../Header/Header";
+import style from "./CalendarView.module.css";
 
 export default function CalendarView() {
   const [ShowEditPricesModal, setShowEditPricesModal] = useState(false);
@@ -172,9 +173,9 @@ export default function CalendarView() {
         onShowPlans={() => setShowSubscriptionsModal(true)}
       />
 
-      <div className="max-w-7xl mx-auto px-4 py-8 grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className={style['Container-Calendar-View']}>
         {/* COLUNA PRINCIPAL */}
-        <div className="lg:col-span-2 bg-white rounded-xl shadow-sm p-6">
+        <div className={style['Container-Calendar-Main-Column']}>
           <CalendarHeader
             currentDate={currentDate}
             onPrevMonth={() => changeMonth(-1)}

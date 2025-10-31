@@ -1,4 +1,4 @@
-import TextInput from "../../Components/TextInput"
+import TextInput from "../../Components/TextInput/TextInput";
 import React, { useState } from "react";
 import { Dog } from "lucide-react";
 import { motion } from "framer-motion";

@@ -1,0 +1,56 @@
+@import "tailwindcss";
+
+.Container {
+    @apply fixed inset-0 flex items-center justify-center p-4 z-[9999];
+}
+.Container-Background {
+    @apply absolute inset-0 bg-black opacity-50 z-[9998];
+}
+.Container-Modal-EditingPrice {
+    @apply relative bg-white rounded-xl shadow-2xl p-6 w-full max-w-md max-h-screen overflow-y-auto z-[9999];
+}
+.Label-EditingPrice {
+    @apply text-xl font-bold text-gray-800 mb-4;
+}
+.Container-Service-Item {
+    @apply p-4 border border-gray-200 rounded-lg;
+}
+.Container-Service-Item-Box {
+    @apply flex items-center justify-between mb-2;
+}
+.Label-Service-Name {
+    @apply font-semibold text-gray-800;
+}
+.Label-Service-Duration {
+    @apply text-sm text-gray-500;
+}
+.Container-Input {
+    @apply flex items-center gap-2;
+}
+.Label-Price-Prefix {
+    @apply absolute left-3 top-2 text-gray-500;
+}
+.Input-Price {
+    @apply w-28 pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500;
+}
+.Button-Save {
+    @apply flex items-center gap-1 px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm;
+}
+.Container-Button-Edit {
+    @apply flex items-center gap-3;
+}
+.Label-Price {
+    @apply text-2xl font-bold text-purple-600;
+}
+.Button-Edit {
+    @apply flex items-center gap-1 px-3 py-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors text-sm;
+}
+.Icon-Edit, .Icon-Check {
+    @apply w-4 h-4;
+}
+.Button-Cancel {
+    @apply px-3 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-sm;
+}
+.Button-Close {
+    @apply w-full px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors mt-2;
+}

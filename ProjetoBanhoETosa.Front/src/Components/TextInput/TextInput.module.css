@@ -1,0 +1,9 @@
+@import "tailwindcss";
+
+.Container-Text-Input{
+    @apply flex flex-col items-start gap-1 mb-3;
+}
+.Text-Input-Field{
+    @apply p-3 rounded-lg border-0 text-left w-full;
+    background-color: #f4f6ff;
+}

@@ -1,21 +1,8 @@
 import React, { useState } from "react";
 import { Edit2, Check } from "lucide-react";
-
-type Service = {
-  id: number;
-  name: string;
-  price: number;
-  duration: number;
-  active?: boolean;
-};
-
-interface Props {
-  services: Service[];
-  onClose: () => void;
-  onSave: (serviceId: number, newPrice: number) => void;
-}
-
-export default function EditingPriceServices({ services, onClose, onSave }: Props) {
+import type { EditingPrice, Service } from "../../../interfaces/EditingPrice";
+import styles from "./EditingPriceServices.module.css";
+export default function EditingPriceServices({ services, onClose, onSave }: EditingPrice) {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [tempPrice, setTempPrice] = useState<string>("");
 
@@ -36,32 +23,32 @@ export default function EditingPriceServices({ services, onClose, onSave }: Prop
   };
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center p-4 z-50" onClick={onClose}>
-      <div className="absolute inset-0 bg-black opacity-50" />
+    <div className={styles.Container} onClick={onClose}>
+      <div className={styles["Container-Background"]} />
       <div
-        className="relative bg-white rounded-xl shadow-2xl p-6 w-full max-w-md max-h-screen overflow-y-auto z-10"
-        onClick={(e) => e.stopPropagation()}
+        className={styles["Container-Modal-EditingPrice"]}
+        onClick={(e) => e.stopPropagation()} // Impede que o clique no modal feche o fundo
         role="dialog"
         aria-modal="true"
       >
-        <h3 className="text-xl font-bold text-gray-800 mb-4">Editar Preços dos Serviços</h3>
+        <h3 className={styles["Label-EditingPrice"]}>Editar Preços dos Serviços</h3>
         <div className="space-y-4">
           {services.map((service) => (
-            <div key={service.id} className="p-4 border border-gray-200 rounded-lg">
-              <div className="flex items-center justify-between mb-2">
+            <div key={service.id} className={styles["Container-Service-Item"]}>
+              <div className={styles["Container-Service-Item-Box"]}>
                 <div>
-                  <h4 className="font-semibold text-gray-800">{service.name}</h4>
-                  <span className="text-sm text-gray-500">{service.duration} min</span>
+                  <h4 className={styles["Label-Service-Name"]}>{service.name}</h4>
+                  <span className={styles["Label-Service-Duration"]}>{service.duration} min</span>
                 </div>
                 {editingId === service.id ? (
-                  <div className="flex items-center gap-2">
+                  <div className={styles["Container-Input"]}>
                     <div className="relative">
-                      <span className="absolute left-3 top-2 text-gray-500">R$</span>
+                      <span className={styles["Label-Price-Prefix"]}>R$</span>
                       <input
                         type="number"
                         value={tempPrice}
                         onChange={(e) => setTempPrice(e.target.value)}
-                        className="w-28 pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                        className={styles["Input-Price"]}
                         step="0.01"
                         min="0"
                         autoFocus
@@ -69,10 +56,10 @@ export default function EditingPriceServices({ services, onClose, onSave }: Prop
                     </div>
                     <button
                       onClick={() => handleSave(service.id)}
-                      className="flex items-center gap-1 px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm"
+                      className={styles["Button-Save"]}
                       aria-label={`Salvar preço de ${service.name}`}
                     >
-                      <Check className="w-4 h-4" />
+                      <Check className={styles["Icon-Check"]} />
                       Salvar
                     </button>
                     <button
@@ -80,20 +67,20 @@ export default function EditingPriceServices({ services, onClose, onSave }: Prop
                         setEditingId(null);
                         setTempPrice("");
                       }}
-                      className="px-3 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-sm"
+                      className={styles["Button-Cancel"]}
                     >
                       Cancelar
                     </button>
                   </div>
                 ) : (
-                  <div className="flex items-center gap-3">
-                    <span className="text-2xl font-bold text-purple-600">R$ {service.price.toFixed(2)}</span>
+                  <div className={styles["Container-Button-Edit"]}>
+                    <span className={styles["Label-Price"]}>R$ {service.price.toFixed(2)}</span>
                     <button
                       onClick={() => startEdit(service)}
-                      className="flex items-center gap-1 px-3 py-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors text-sm"
+                      className={styles["Button-Edit"]}
                       aria-label={`Editar preço de ${service.name}`}
                     >
-                      <Edit2 className="w-4 h-4" />
+                      <Edit2 className={styles["Icon-Edit"]} />
                       Editar
                     </button>
                   </div>
@@ -101,10 +88,7 @@ export default function EditingPriceServices({ services, onClose, onSave }: Prop
               </div>
             </div>
           ))}
-          <button
-            onClick={onClose}
-            className="w-full px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors mt-2"
-          >
+          <button onClick={onClose} className={styles["Button-Close"]}>
             Fechar
           </button>
         </div>

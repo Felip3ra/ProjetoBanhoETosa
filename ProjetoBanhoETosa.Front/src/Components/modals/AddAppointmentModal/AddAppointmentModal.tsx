@@ -1,25 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom";
-
-export interface Appointment {
-  petName: string;
-  owner: string;
-  service: string;
-  date: string; // YYYY-MM-DD
-  time: string; // HH:mm
-  phone: string;
-  price: number;
-  paymentMethod: string;
-}
-
-interface AddAppointmentModalProps {
-  show: boolean;
-  onClose: () => void;
-  onSubmit: () => void;
-  newAppointment: Appointment;
-  setNewAppointment: (value: Appointment) => void;
-  handleServiceChange: (service: string) => void;
-}
+import type { AddAppointmentModalProps } from "../../../interfaces/Appointment";
+import styles from "./AddAppointmentModal.module.css";
 
 const AddAppointmentModal: React.FC<AddAppointmentModalProps> = ({
   show,
@@ -32,48 +14,48 @@ const AddAppointmentModal: React.FC<AddAppointmentModalProps> = ({
   if (!show) return null;
 
   return ReactDOM.createPortal(
-    <div className="fixed inset-0 flex items-center justify-center p-4 z-[99999]">
-        <div className="absolute inset-0 bg-black opacity-70"></div>
-      <div className="relative bg-white rounded-xl shadow-2xl p-6 w-full max-w-md max-h-screen overflow-y-auto">
-        <h3 className="text-xl font-bold text-gray-800 mb-4">Novo Agendamento</h3>
+    <div className={styles['Container']}>
+        <div className={styles['Container-Background']}></div>
+      <div className={styles['Container-Modal']}>
+        <h3 className={styles['Container-Modal-Tittle']}>Novo Agendamento</h3>
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Nome do Pet</label>
+            <label className={styles.Label}>Nome do Pet</label>
             <input
               type="text"
               value={newAppointment.petName}
               onChange={(e) => setNewAppointment({ ...newAppointment, petName: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className={styles.Input}
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Nome do Dono</label>
+            <label className={styles.Label}>Nome do Dono</label>
             <input
               type="text"
               value={newAppointment.owner}
               onChange={(e) => setNewAppointment({ ...newAppointment, owner: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className={styles.Input}
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Telefone</label>
+            <label className={styles.Label}>Telefone</label>
             <input
               type="tel"
               value={newAppointment.phone}
               onChange={(e) => setNewAppointment({ ...newAppointment, phone: e.target.value })}
               placeholder="(11) 99999-9999"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className={styles.Input}
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Serviço</label>
+            <label className={styles.Label}>Serviço</label>
             <select
               value={newAppointment.service}
               onChange={(e) => handleServiceChange(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className={styles.Input}
             >
               <option>Banho e Tosa</option>
               <option>Banho</option>
@@ -82,11 +64,11 @@ const AddAppointmentModal: React.FC<AddAppointmentModalProps> = ({
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Forma de Pagamento</label>
+            <label className={styles.Label}>Forma de Pagamento</label>
             <select
               value={newAppointment.service}
               onChange={(e) => handleServiceChange(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className={styles.Input}
             >
               <option>PIX</option>
               <option>Dinheiro</option>
@@ -98,14 +80,14 @@ const AddAppointmentModal: React.FC<AddAppointmentModalProps> = ({
           </div>
 
           <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Preço</label>
+                <label className={styles.Label}>Preço</label>
                 <div className="relative">
-                  <span className="absolute left-3 top-2 text-gray-500">R$</span>
+                  {/* <span className="absolute left-3 top-2 text-gray-500">R$</span> */}
                   <input
                     type="number"
                     value={newAppointment.price}
                     onChange={(e) => setNewAppointment({ ...newAppointment, price: parseFloat(e.target.value) || 0 })}
-                    className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    className={styles.Input}
                     step="0.01"
                     disabled={newAppointment.paymentMethod === 'plano'}
                   />
@@ -116,35 +98,35 @@ const AddAppointmentModal: React.FC<AddAppointmentModalProps> = ({
               </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Data</label>
+            <label className={styles['Label']}>Data</label>
             <input
               type="date"
               value={newAppointment.date}
               onChange={(e) => setNewAppointment({ ...newAppointment, date: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className={styles['Input']}
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Horário</label>
+            <label className={styles['Label']}>Horário</label>
             <input
               type="time"
               value={newAppointment.time}
               onChange={(e) => setNewAppointment({ ...newAppointment, time: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className={styles['Input']}
             />
           </div>
 
           <div className="flex gap-3 pt-4">
             <button
               onClick={onClose}
-              className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+              className={styles['Button-Close']}
             >
               Cancelar
             </button>
             <button
               onClick={onSubmit}
-              className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              className={styles['Button-Save']}
             >
               Agendar
             </button>

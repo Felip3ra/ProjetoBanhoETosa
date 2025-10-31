@@ -1,15 +1,5 @@
 import { Scissors, Dog, Edit2 } from "lucide-react";
-
-interface PricingListProps {
-  services: {
-    id: number;
-    name: string;
-    price: number;
-    duration: number;
-    active: boolean;
-  }[];
-  OpenModalEdit: () => void;
-}
+import type { PricingListProps } from "../../interfaces/PricingList";
 
 export default function PricingList({ services,OpenModalEdit }: PricingListProps) {
   // Ícone por serviço

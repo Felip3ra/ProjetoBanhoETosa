@@ -1,0 +1,77 @@
+@import "tailwindcss";
+
+.title {
+  @apply font-semibold text-gray-700 mb-4;
+}
+
+.empty {
+  @apply text-center py-8 text-gray-500;
+}
+
+.emptyIcon {
+  @apply w-12 h-12 mx-auto mb-2 opacity-50;
+}
+
+.list {
+  @apply space-y-3;
+}
+
+.card {
+  @apply bg-gradient-to-r from-blue-50 to-purple-50 p-4 rounded-lg border border-blue-100;
+}
+
+.cardContent {
+  @apply flex items-start justify-between;
+}
+
+.details {
+  @apply flex-1;
+}
+
+.header {
+  @apply flex items-center gap-2 mb-2;
+}
+
+.petName {
+  @apply font-bold text-gray-800;
+}
+
+.owner {
+  @apply text-sm text-gray-600;
+}
+
+.info {
+  @apply flex flex-wrap gap-3 text-sm text-gray-600;
+}
+
+.icon {
+  @apply w-4 h-4;
+}
+
+.iconBlue {
+  @apply w-5 h-5 text-blue-600;
+}
+
+.price {
+  @apply flex items-center gap-1 font-semibold text-green-600;
+}
+
+.cancelBtn {
+  @apply ml-4 px-3 py-1 text-red-600 hover:bg-red-50 rounded text-sm;
+}
+
+.total {
+  @apply bg-green-100 p-4 rounded-lg border border-green-300 mt-4;
+}
+
+.totalRow {
+  @apply flex items-center justify-between;
+}
+
+.totalLabel {
+  @apply font-bold text-green-800;
+}
+
+.totalValue {
+  @apply text-2xl font-bold text-green-700;
+}
