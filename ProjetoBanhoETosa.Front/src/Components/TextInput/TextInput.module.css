@@ -1,9 +1,8 @@
 @import "tailwindcss";
 
-.Container-Text-Input{
-    @apply flex flex-col items-start gap-1 mb-3;
+.Label-Input{
+    @apply block text-gray-700 mb-2 font-medium text-sm;
 }
-.Text-Input-Field{
-    @apply p-3 rounded-lg border-0 text-left w-full;
-    background-color: #f4f6ff;
+.Input-Field{
+    @apply w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent;
 }

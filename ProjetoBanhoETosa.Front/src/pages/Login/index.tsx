@@ -1,55 +1,238 @@
 import TextInput from "../../Components/TextInput/TextInput";
 import React, { useState } from "react";
-import { Dog } from "lucide-react";
+import { Dog, Plus } from "lucide-react";
+import styles from "./Login.module.css";
 import { motion } from "framer-motion";
 export default function Login() {
-    const [email,setEmail] = useState("");
-    const [password,setPassword] = useState("");
-    const [loading,SetLoading] = useState(false);
-    function HandleSubmit(e: React.FormEvent){
-        e.preventDefault();
-        SetLoading(true);
-        setTimeout(() => {
-            SetLoading(false);
-        },5000);
-        console.log({email,password})
+
+  const [loading, setLoading] = useState(false);
+  const [loginForm, setLoginForm] = useState({ email: '', password: '' });
+  const [registerForm, setRegisterForm] = useState({
+    name: '',
+    email: '',
+    password: '',
+    confirmPassword: '',
+    role: 'admin'
+  });
+  const [systemUsers, setSystemUsers] = useState([
+    { id: 1, email: 'admin@petshop.com', password: 'admin123', name: 'Administrador', role: 'admin' },
+    { id: 2, email: 'funcionario@petshop.com', password: 'func123', name: 'Funcionário', role: 'funcionario' }
+  ]);
+  const handleLogin = () => {
+    const user = systemUsers.find(u => u.email === loginForm.email && u.password === loginForm.password);
+    if (user) {
+
+      setLoginForm({ email: '', password: '' });
+    } else {
+      alert('Email ou senha incorretos!');
     }
-    return (
-        
-            <section className="bg-[#f4f6ff] min-h-screen flex justify-center items-center">
-                <div className="max-w-md w-full bg-white p-8 rounded-2xl gap-3 shadow">
-                    <div className="flex justify-center">
-                        <div className="bg-blue-600 p-4 rounded-full">
-                            <Dog className="w-12 h-12 text-white" />
-                        </div>
-                    </div>
-                    <h1 className="text-3xl text-gray-800 mb-2">PetShop Banho e Tosa</h1>
-                    <p>Sistema de Agendamentos</p>
-                    <form onSubmit={HandleSubmit}>
-                        <TextInput Type="text" PlaceHolder="seu@email.com" Value={email} OnChange={(e) => setEmail(e.target.value)}/>
-                        <TextInput Type="password" PlaceHolder="********" Value={password} OnChange={(e) => setPassword(e.target.value)}/>
+  };
 
-                        
-                        <motion.button
-      whileTap={{ scale: 0.95 }}
-      onClick={HandleSubmit}
-      disabled={loading}
-      className="relative flex items-center justify-center bg-blue-600 text-white font-semibold p-3 rounded-lg overflow-hidden disabled:opacity-60 w-full"
-    >
-      {loading ? (
-        <motion.div
-          className="w-5 h-5 border-2 border-white border-t-transparent rounded-full"
-          animate={{ rotate: 360 }}
-          transition={{ repeat: Infinity, duration: 0.8, ease: "linear" }}
-        />
-      ) : (
-        "Entrar"
-      )}
-    </motion.button>
-                    </form>
+  const handleRegister = () => {
+    if (!registerForm.name || !registerForm.email || !registerForm.password || !registerForm.confirmPassword) {
+      alert('Por favor, preencha todos os campos!');
+      return;
+    }
 
-                </div>
-            </section>
-        
-    );
+    if (registerForm.password !== registerForm.confirmPassword) {
+      alert('As senhas não coincidem!');
+      return;
+    }
+
+    if (registerForm.password.length < 6) {
+      alert('A senha deve ter no mínimo 6 caracteres!');
+      return;
+    }
+
+    const emailExists = systemUsers.find(u => u.email === registerForm.email);
+    if (emailExists) {
+      alert('Este email já está cadastrado! Por favor, faça login.');
+      return;
+    }
+
+    const newId = Math.max(...systemUsers.map(u => u.id), 0) + 1;
+    const newUser = {
+      id: newId,
+      name: registerForm.name,
+      email: registerForm.email,
+      password: registerForm.password,
+      role: systemUsers.length === 0 ? 'admin' : registerForm.role
+    };
+
+    setSystemUsers([...systemUsers, newUser]);
+
+    setRegisterForm({ name: '', email: '', password: '', confirmPassword: '', role: 'admin' });
+    alert('Cadastro realizado com sucesso!');
+  };
+  const [authView, setAuthView] = useState('login');
+
+  return (
+
+    <div className={styles['Container']}>
+      <div className={styles['Container-Background']}>
+        <div className={styles['Container-Header-Icon']}>
+          <div className={styles['Container-Icon']}>
+            <Dog className={styles['Icon-Dog']} />
+          </div>
+        </div>
+        <h1 className={styles.Tittle}>Petshop Manager</h1>
+        <p className={styles.Subtittle}>Sistema de Agendamentos</p>
+
+
+        <div className={styles['Tab-Buttons']}>
+          <button
+            onClick={() => setAuthView('login')}
+            className={`${styles['Tab-Button']} ${authView === 'login'
+              ? styles['Tab-Button-Active']
+              : styles['Tab-Button-Inactive']
+              }`}
+          >
+            Login
+          </button>
+          <button
+            onClick={() => setAuthView('register')}
+            className={`${styles['Tab-Button']} ${authView === 'register'
+              ? styles['Tab-Button-Active']
+              : styles['Tab-Button-Inactive']
+              }`}
+          >
+            Cadastrar
+          </button>
+        </div>
+
+        {authView === 'login' ? (
+          <div className="space-y-4">
+
+            <TextInput
+              Type="email"
+              Value={loginForm.email}
+              PlaceHolder="seu@email.com"
+              OnChange={(e) => setLoginForm({ ...loginForm, email: e.target.value })}
+              Label="Email"
+            />
+
+            <TextInput
+              Type="password"
+              Value={loginForm.password}
+              PlaceHolder="senha"
+              OnChange={(e) => setLoginForm({ ...loginForm, password: e.target.value })}
+              Label="Senha"
+            />
+
+            <motion.button
+              whileTap={{ scale: 0.95 }}
+              onClick={handleLogin}
+              disabled={loading}
+              className={`${styles["Button-Login"]} relative flex items-center justify-center overflow-hidden disabled:opacity-60`}
+            >
+              {loading ? (
+                <motion.div
+                  className="w-5 h-5 border-2 border-white border-t-transparent rounded-full"
+                  animate={{ rotate: 360 }}
+                  transition={{ repeat: Infinity, duration: 0.8, ease: "linear" }}
+                />
+              ) : (
+                "Entrar"
+              )}
+            </motion.button>
+
+            <div className="relative my-6">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-300"></div>
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-2 bg-white text-gray-500">ou</span>
+              </div>
+            </div>
+
+            <button
+              onClick={() => setAuthView('register')}
+              className={styles['Button-Register']}
+            >
+              <Plus className={styles['Icon-Plus']} />
+              Criar Nova Conta
+            </button>
+          </div>
+        ) : (
+          <div className="space-y-4">
+
+            <TextInput
+              Type="text"
+              Value={registerForm.name}
+              OnChange={(e) => setRegisterForm({ ...registerForm, name: e.target.value })}
+
+              PlaceHolder="João Silva"
+              Label="Nome"
+            />
+
+            <TextInput
+              Type="email"
+              Value={loginForm.email}
+              PlaceHolder="seu@email.com"
+              OnChange={(e) => setRegisterForm({ ...registerForm, email: e.target.value })}
+              Label="Email"
+            />
+
+            <TextInput
+              Type="password"
+              Value={registerForm.password}
+              OnChange={(e) => setRegisterForm({ ...registerForm, password: e.target.value })}
+              PlaceHolder="Mínimo 6 caracteres"
+              Label="Senha"
+            />
+            <TextInput
+              Type="password"
+              Value={registerForm.password}
+              OnChange={(e) => setRegisterForm({ ...registerForm, confirmPassword: e.target.value })}
+              PlaceHolder="Mínimo 6 caracteres"
+              Label="Confirmar Senha"
+            />
+
+
+            {systemUsers.length === 0 && (
+              <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
+                <p className="text-sm text-blue-800">
+                  🎉 <strong>Primeira conta!</strong> Você será cadastrado como Administrador.
+                </p>
+              </div>
+            )}
+
+
+            <motion.button
+              whileTap={{ scale: 0.95 }}
+              onClick={handleRegister}
+              disabled={loading}
+              className={`${styles['Button-Create-Account']} relative flex items-center justify-center overflow-hidden disabled:opacity-60`}
+            >
+              {loading ? (
+                <motion.div
+                  className="w-5 h-5 border-2 border-white border-t-transparent rounded-full"
+                  animate={{ rotate: 360 }}
+                  transition={{ repeat: Infinity, duration: 0.8, ease: "linear" }}
+                />
+              ) : (
+                "Criar Conta"
+              )}
+            </motion.button>
+
+            <div className={styles['Container-Account-Exists']}>
+              <p>
+                Já tem uma conta?{' '}
+                <button
+                  onClick={() => setAuthView('login')}
+                  className={styles['Link-Login']}
+                >
+                  Faça login aqui
+                </button>
+              </p>
+            </div>
+          </div>
+        )}
+
+
+      </div>
+    </div>
+
+
+  );
 }

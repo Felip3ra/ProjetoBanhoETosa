@@ -5,4 +5,5 @@ export interface TextInput{
     PlaceHolder: string;
     Value: string;
     OnChange: (e: ChangeEvent<HTMLInputElement>) => void;
+    Label: string;
 }
