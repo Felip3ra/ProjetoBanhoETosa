@@ -29,6 +29,10 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 var app = builder.Build();
 
+app.UseStaticFiles(); // serve os arquivos do front (Vite)
+app.MapControllers();
+app.MapFallbackToFile("index.html"); // fallback SPA
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
