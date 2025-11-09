@@ -1,0 +1,25 @@
+@import "tailwindcss";
+
+.Container-Month-Resume{
+    @apply bg-white rounded-xl shadow-sm p-6;
+}
+
+.Tittle-Month-Resume{
+    @apply font-bold text-gray-800 mb-4;
+}
+
+.Info-Resume{
+    @apply flex items-center justify-between p-3 bg-blue-50 rounded-lg;
+}
+.Label-Resume, .Label-Revenue{
+    @apply text-gray-700;
+}
+.Amount-Resume{
+    @apply font-bold text-blue-600 text-xl;
+}
+.Info-Revenue{
+    @apply flex items-center justify-between p-3 bg-green-50 rounded-lg;
+}
+.Amount-Revenue{
+    @apply font-bold text-green-600 text-xl;
+}

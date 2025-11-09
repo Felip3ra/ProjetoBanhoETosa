@@ -1,0 +1,62 @@
+@import "tailwindcss";
+
+.Container{
+    @apply min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center p-4;
+}
+
+.Container-Background{
+    @apply bg-white rounded-2xl shadow-xl p-8 w-full max-w-md;
+}
+
+.Container-Header-Icon{
+    @apply flex justify-center mb-6;
+}
+
+.Container-Icon{
+    @apply bg-blue-600 p-4 rounded-full;
+}
+.Icon-Dog{
+    @apply w-12 h-12 text-white;
+}
+.Tittle{
+    @apply text-3xl text-gray-800 mb-2 text-center font-bold;
+}
+.Subtittle{
+    @apply text-center text-gray-600 mb-8;
+}
+.Tab-Buttons{
+    @apply flex gap-2 mb-6 border-b;
+}
+.Tab-Button{
+    @apply flex-1 pb-3 font-semibold transition-all;
+}
+.Tab-Button-Active{
+    @apply text-blue-600 border-b-2 border-blue-600;
+}
+.Tab-Button-Inactive{
+    @apply text-gray-500 hover:text-gray-700;
+}
+.Label-Input{
+    @apply block text-gray-700 mb-2 font-medium text-sm;
+}
+.Input-Field{
+    @apply w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent;
+}
+.Button-Login{
+    @apply w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors;
+}
+.Button-Register{
+    @apply w-full bg-white text-blue-600 py-3 rounded-lg font-semibold border-2 border-blue-600 hover:bg-blue-50 transition-colors flex items-center justify-center gap-2;
+}
+.Icon-Plus{
+    @apply w-5 h-5;
+}
+.Button-Create-Account{
+    @apply w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors;
+}
+.Container-Account-Exists{
+    @apply mt-4 text-center text-gray-600;
+}
+.Link-Login{
+    @apply text-blue-600 font-semibold hover:text-blue-700;
+}

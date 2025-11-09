@@ -1,0 +1,71 @@
+@import "tailwindcss";
+
+.Container{
+    @apply fixed inset-0 flex items-center justify-center p-4 z-[99999];
+}
+.Container-Background{
+    @apply absolute inset-0 bg-black opacity-50;
+}
+.Container-Modal-Plan{
+    @apply relative bg-white rounded-xl shadow-2xl p-6 w-full max-w-2xl max-h-screen overflow-y-auto z-10;
+}
+.Container-Header-Modal-Plan{
+    @apply flex justify-between items-center mb-4;
+}
+.Container-Header-Modal-Plan-Tittle{
+    @apply text-xl font-bold text-gray-800 text-center;
+}
+.Container-Subscriptions{
+    @apply grid grid-cols-2 gap-3 text-sm mb-3;
+}
+.Container-Subscriptions-Label{
+    @apply text-gray-600;
+}
+.Container-Subscriptions-Value{
+    @apply font-semibold ml-1;
+}
+.Button-New-Plan{
+    @apply flex items-center gap-2 bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700;
+}
+.Container-Alert{
+    @apply flex items-center gap-2 text-red-700 text-sm mb-2;
+}
+.Icon-Plus,.Icon-AlertCircle{
+    @apply w-4 h-4;
+}
+.Container-Payment{
+    @apply p-4 border-2 rounded-lg;
+}
+.Expired{
+    @apply border-red-300 bg-red-50;
+}
+.Expiring{
+    @apply border-yellow-300 bg-yellow-50;
+}
+.Active{
+    @apply border-green-300 bg-green-50;
+}
+.Container-Payment-Information{
+    @apply flex items-center justify-between mb-3;
+}
+.Container-Payment-Customer{
+    @apply font-bold text-gray-800 text-lg;
+}
+.Container-Payment-PlanName{
+    @apply text-sm text-gray-600;
+}
+.Container-Payment-Status{
+    @apply text-xs font-semibold px-3 py-1 rounded-full;
+}
+.Payment-Paid{
+    @apply bg-green-100 text-green-700;
+}
+.Payment-Pending{
+    @apply bg-yellow-100 text-yellow-700;
+}
+.Button-Confirm{
+    @apply w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-semibold;
+}
+.Button-Close{
+    @apply w-full px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors mt-4;
+}
