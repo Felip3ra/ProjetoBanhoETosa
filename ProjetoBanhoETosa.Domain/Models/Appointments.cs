@@ -44,9 +44,9 @@ namespace ProjetoBanhoETosa.Domain.Models
         [ForeignKey(nameof(Subscription))]
         public int? SubscriptionId { get; set; }
         [Column(TypeName = "datetime2")]
-        public DateTime CreatedAt { get; set; }
+        public DateTime CreatedAt { get; set; } = DateTime.Now;
         [Column(TypeName = "datetime2")]
-        public DateTime UpdatedAt { get; set; }
+        public DateTime? UpdatedAt { get; set; } = DateTime.Now;
 
         public Service Service { get; set; }
         public Subscription Subscriptions { get; set; }

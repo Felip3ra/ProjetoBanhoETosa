@@ -16,8 +16,8 @@ namespace ProjetoBanhoETosa.Domain.Models
         public decimal Price { get; set; }
         public int ServicesAvailable { get; set; }
         [Column(TypeName = "datetime2")]
-        public DateTime created_at { get; set; }
+        public DateTime created_at { get; set; } = DateTime.Now;
         [Column(TypeName = "datetime2")]
-        public DateTime updated_at { get; set; }
+        public DateTime? updated_at { get; set; } = DateTime.Now;
     }
 }

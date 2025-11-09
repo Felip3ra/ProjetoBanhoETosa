@@ -25,9 +25,9 @@ namespace ProjetoBanhoETosa.Domain.Models
         public string PaymentStatus { get; set; }
         public string PaymentMethod { get; set; }
         [Column(TypeName = "datetime2")]
-        public DateTime CreatedAt { get; set; }
+        public DateTime CreatedAt { get; set; } = DateTime.Now;
         [Column(TypeName = "datetime2")]
-        public DateTime UpdatedAt { get; set; }
+        public DateTime? UpdatedAt { get; set; } = DateTime.Now;
 
     }
 }

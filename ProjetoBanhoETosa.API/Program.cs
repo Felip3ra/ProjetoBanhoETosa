@@ -1,14 +1,11 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using ProjetoBanhoETosa.Infrastructure.Context;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
-
+// Serviços
 builder.Services.AddControllers();
-
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
@@ -26,28 +23,33 @@ builder.Services.AddDbContext<AppDbContext>(options =>
         b => b.MigrationsAssembly("ProjetoBanhoETosa.Infrastructure")
     )
 );
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
 
 var app = builder.Build();
+app.UseCors("AllowAll");
 
-app.UseStaticFiles(); // serve os arquivos do front (Vite)
-app.MapControllers();
-app.MapFallbackToFile("index.html"); // fallback SPA
-
-// Configure the HTTP request pipeline.
+// Middleware
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI(c =>
     {
-        c.SwaggerEndpoint("/openapi/v1.json", "Projeto Banho e Tosa API v1");
-        c.RoutePrefix = string.Empty;
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "Projeto Banho e Tosa API v1");
+        c.RoutePrefix = string.Empty; 
     });
-    app.MapOpenApi();
 }
 
 app.UseHttpsRedirection();
-
-
+app.UseStaticFiles();
+app.MapControllers();
+app.MapFallbackToFile("index.html");
 
 app.Run();
-
