@@ -28,9 +28,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="wwwroot\assets\index-CDRTsbAL.js" />
-    <None Include="wwwroot\assets\index-CpxTK8Xu.css" />
-    <None Include="wwwroot\index.html" />
+    <Folder Include="wwwroot\" />
   </ItemGroup>
 
 </Project>

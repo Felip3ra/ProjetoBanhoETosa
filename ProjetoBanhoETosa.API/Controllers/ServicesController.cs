@@ -5,7 +5,7 @@ using ProjetoBanhoETosa.Infrastructure.Context;
 
 namespace ProjetoBanhoETosa.Presentation.Controllers
 {
-    [Route("/api/[controller]")]
+    [Route("api/[controller]")]
     public class ServicesController : Controller
     {
         private readonly AppDbContext _context;
@@ -13,30 +13,35 @@ namespace ProjetoBanhoETosa.Presentation.Controllers
         {
             _context = context;
         }
-        [HttpGet("/GetAllServices")]
+        [HttpGet("GetAllServices")]
         public IActionResult GetAllServices() {
             List<Service> services = _context.Services.ToList();
             if (services == null || services.Count == 0)
             {
                 return NotFound(new { message = "Servicos não Encontrados" });
             }
-            return Ok(new { message = "Servicos Encontrados", Service = services });
+            return Ok(new { message = "Servicos Encontrados", Services = services });
         }
 
-        [HttpPut("/UpdateService/{id}")]
-        public IActionResult UpdateService(int id,[FromBody] Service service) {
-            if (service == null || service.Price <= 0)
+        [HttpPut("UpdateService/{id}")]
+        public IActionResult UpdateService(int id, [FromBody] decimal newPrice)
+        {
+            if (newPrice <= 0)
                 return BadRequest(new { message = "Preço inválido." });
 
-            var existe = _context.Services.FirstOrDefault(s => s.Id == id);
-            if (existe == null)
+            var newService = _context.Services.FirstOrDefault(s => s.Id == id);
+            if (newService == null)
                 return NotFound(new { message = "Serviço não encontrado." });
 
-            existe.Price = service.Price;
-            _context.Entry(existe).State = EntityState.Modified;
+            newService.Price = newPrice;
+            _context.Services.Update(newService);
             _context.SaveChanges();
 
-            return Ok(new { message = "Preço atualizado com sucesso!", Service = existe });
+            return Ok(new
+            {
+                message = "Preço atualizado com sucesso!",
+                service = newService
+            });
         }
     }
 }

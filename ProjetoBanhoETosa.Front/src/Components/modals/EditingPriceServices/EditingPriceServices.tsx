@@ -12,15 +12,23 @@ export default function EditingPriceServices({ services, onClose, onSave }: Edit
   };
 
   const handleSave = (serviceId: number) => {
-    const price = parseFloat(tempPrice.replace(",", "."));
-    if (isNaN(price) || price <= 0) {
-      alert("Por favor, insira um preço válido!");
-      return;
-    }
-    onSave(serviceId, price);
-    setEditingId(null);
-    setTempPrice("");
-  };
+    console.log(tempPrice)
+  if (!tempPrice) {
+    alert("Por favor, insira um preço válido!");
+    return;
+  }
+
+  const price = Number(tempPrice.replace(",", "."));
+  if (isNaN(price) || price <= 0) {
+    alert("Por favor, insira um preço válido!");
+    return;
+  }
+
+  onSave(serviceId, price);
+  setEditingId(null);
+  setTempPrice("");
+};
+
 
   return (
     <div className={styles.Container} onClick={onClose}>
@@ -46,7 +54,7 @@ export default function EditingPriceServices({ services, onClose, onSave }: Edit
                       <span className={styles["Label-Price-Prefix"]}>R$</span>
                       <input
                         type="number"
-                        value={tempPrice}
+                        value={tempPrice || ""}
                         onChange={(e) => setTempPrice(e.target.value)}
                         className={styles["Input-Price"]}
                         step="0.01"

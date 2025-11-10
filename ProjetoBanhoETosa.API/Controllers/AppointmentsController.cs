@@ -1,11 +1,12 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using ProjetoBanhoETosa.Domain.Models;
 using ProjetoBanhoETosa.Infrastructure.Context;
 using ProjetoBanhoETosa.Presentation.DTO;
 
 namespace ProjetoBanhoETosa.Presentation.Controllers
 {
-    [Route("/api/[controller]")]
+    [Route("api/[controller]")]
     public class AppointmentsController : Controller
     {
         private readonly AppDbContext _context;
@@ -14,44 +15,81 @@ namespace ProjetoBanhoETosa.Presentation.Controllers
         {
             _context = context;
         }
-        [HttpGet("/GetAllAppointments")]
+        [HttpGet("GetAllAppointments")]
         public IActionResult GetAllAppointments()
         {
-            List<Appointment> appointments = _context.Appointments.ToList();
+            var appointments = _context.Appointments.ToList();
+
             if (appointments == null || appointments.Count == 0)
-            {
                 return NotFound(new { message = "No appointments found" });
-            }
-            return Ok(new { message = "No appointments found", Appointment = appointments });
+
+            // Mapeia entidade → DTO
+            var dtoList = appointments.Select(a => new AppointmentDTO
+            {
+                Id = a.Id,
+                PetName = a.PetName,
+                OwnerName = a.OwnerName,
+                Phone = a.Phone,
+                ServiceName = a.Service?.Name ?? "Desconhecido",
+                AppointmentDateString = a.AppointmentDate.ToString("yyyy-MM-dd"),
+                AppointmentTimeString = a.AppointmentTime.ToString("HH:mm"),
+                Price = a.Price,
+                PaymentMethodString = a.PaymentMethod.ToString(),
+                PaymentStatus = a.PaymentStatus,
+                HasSubscription = a.HasSubscription,
+                SubscriptionId = a.SubscriptionId
+            }).ToList();
+
+            return Ok(new
+            {
+                message = "Appointments retrieved successfully",
+                appointments = dtoList
+            });
         }
-        [HttpPost("/NewAppointment")]
-        public IActionResult NewAppointment([FromBody] AppointmentDTO appointmentDTO)
+
+        [HttpPost("NewAppointment")]
+        public IActionResult NewAppointment([FromBody] AppointmentDTO dto)
         {
-            if (appointmentDTO == null)
+            if (dto == null)
+                return BadRequest(new { message = "Invalid JSON format" });
+
+            // Converte tipos textuais vindos do front
+            dto.AppointmentDate = DateTime.Parse(dto.AppointmentDateString);
+            dto.AppointmentTime = TimeOnly.Parse(dto.AppointmentTimeString);
+
+            if (!Enum.TryParse<PaymentMethod>(dto.PaymentMethodString, true, out var method))
+                method = PaymentMethod.Pix;
+
+            dto.PaymentMethod = method;
+
+            // Exemplo: se tiver tabela Service
+            var service = _context.Services.FirstOrDefault(s => s.Name == dto.ServiceName);
+            dto.ServiceId = service?.Id ?? 1;
+
+            var appointment = new Appointment
             {
-                return BadRequest(new { message = "The form has not filled correctly" });
-            }
-            Appointment newAppointment = new Appointment
-            {
-                PetName = appointmentDTO.PetName,
-                OwnerName = appointmentDTO.OwnerName,
-                Phone = appointmentDTO.Phone,
-                Price = appointmentDTO.Price,
-                ServiceId = appointmentDTO.ServiceId,
-                AppointmentDate = appointmentDTO.AppointmentDate,
-                AppointmentTime = appointmentDTO.AppointmentTime,
-                PaymentMethod = appointmentDTO.PaymentMethod,
-                PaymentStatus = appointmentDTO.PaymentStatus,
-                HasSubscription = appointmentDTO.HasSubscription,
-                SubscriptionId = appointmentDTO.SubscriptionId,
+                PetName = dto.PetName,
+                OwnerName = dto.OwnerName,
+                Phone = dto.Phone,
+                ServiceId = dto.ServiceId,
+                AppointmentDate = dto.AppointmentDate,
+                AppointmentTime = dto.AppointmentTime,
+                Price = dto.Price,
+                PaymentMethod = dto.PaymentMethod,
+                PaymentStatus = PaymentStatus.Pendente,
+                HasSubscription = false,
+                SubscriptionId = null,
                 CreatedAt = DateTime.Now,
                 UpdatedAt = DateTime.Now
             };
-            _context.Appointments.Add(newAppointment);
+
+            _context.Appointments.Add(appointment);
             _context.SaveChanges();
-            return Ok(new { message = "The Appointment Has been created sucessfuly", appointment = appointmentDTO });
+
+            return Ok(new { message = "Appointment created successfully", appointment });
         }
-        [HttpDelete("/DeleteAppointment/{id}")]
+
+        [HttpDelete("DeleteAppointment/{id}")]
         public IActionResult DeleteAppointment(int id)
         {
             if (id == 0 || id == null)
@@ -63,7 +101,7 @@ namespace ProjetoBanhoETosa.Presentation.Controllers
             _context.SaveChanges();
             return NoContent();
         }
-        //[HttpPut("/UpdateAppointment/{id}")]
+        //[HttpPut("UpdateAppointment/{id}")]
         //public IActionResult UpdateAppointment(int id)
         //{
         //    if (id == 0 || id == null)

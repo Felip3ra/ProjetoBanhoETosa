@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import CalendarHeader from "../CalendarHeader/CalendarHeader";
 import CalendarGrid from "../CalendarGrid/CalendarGrid";
 import AppointmentList from "../../AppointmentList/AppointmentList";
@@ -17,26 +17,12 @@ export default function CalendarView() {
   const [showSubscriptionsModal, setShowSubscriptionsModal] = useState(false);
   const [editingService, setEditingService] = useState<any>(null);
   const [tempPrice, setTempPrice] = useState("");
-  const [services, setServices] = useState([
-    { id: 1, name: "Banho e Tosa", price: 80.0, duration: 90, active: true },
-    { id: 2, name: "Banho", price: 50.0, duration: 45, active: true },
-    { id: 3, name: "Tosa", price: 60.0, duration: 60, active: true },
-  ]);
-
-  const handleUpdateServicePrice = (serviceId: number) => {
-    const newPrice = parseFloat(tempPrice);
-    if (isNaN(newPrice) || newPrice <= 0) {
-      alert("Por favor, insira um preço válido!");
-      return;
-    }
-    setServices(services.map((s) => (s.id === serviceId ? { ...s, price: newPrice } : s)));
-    setEditingService(null);
-    setTempPrice("");
-  };
+  const [services, setServices] = useState<any[]>([]);
+  const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const [subscriptions, setSubscriptions] = useState<any[]>([]);
 
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split("T")[0]);
-  const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [showAddModal, setShowAddModal] = useState(false);
 
   const [newAppointment, setNewAppointment] = useState<Appointment>({
@@ -48,68 +34,165 @@ export default function CalendarView() {
     price: 80,
     phone: "",
     date: new Date().toISOString().split("T")[0],
+    paymentMethod: "PIX"
   });
 
-  const [subscriptions, setSubscriptions] = useState([
-    {
-      id: 1,
-      customerName: "Pedro Costa",
-      planName: "Plano Básico",
-      startDate: "2025-10-01",
-      endDate: "2025-10-31",
-      price: 200,
-      servicesUsed: 1,
-      servicesAvailable: 4,
-      paymentStatus: "pago",
-    },
-    {
-      id: 2,
-      customerName: "Ana Lima",
-      planName: "Plano Premium",
-      startDate: "2025-10-05",
-      endDate: "2025-11-05",
-      price: 350,
-      servicesUsed: 3,
-      servicesAvailable: 8,
-      paymentStatus: "pendente",
-    },
-  ]);
+  // Atualizar preço de serviço
+  const handleUpdateServicePrice = async (serviceId: number,newPrice: number) => {
+    
+    console.log(newPrice)
+    if (isNaN(newPrice) || newPrice <= 0) {
+      alert("Por favor, insira um preço válido!");
+      return;
+    }
 
-  // Atualiza o preço conforme o serviço
-  const handleServiceChange = (service: string) => {
-    let price = 80;
-    if (service === "Banho") price = 50;
-    if (service === "Tosa") price = 60;
-    setNewAppointment({ ...newAppointment, service, price });
+    try {
+      const response = await fetch(`http://localhost:5159/api/Services/UpdateService/${serviceId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newPrice),
+      });
+
+      if (!response.ok) throw new Error("Erro ao atualizar serviço");
+
+      const data = await response.json();
+      alert(data.message);
+
+      setServices(services.map((s) => (s.id === serviceId ? { ...s, price: newPrice } : s)));
+      setEditingService(null);
+      setTempPrice("");
+    } catch (error) {
+      alert("Erro ao atualizar o serviço!");
+      console.error(error);
+    }
   };
 
-  // Adiciona um novo agendamento
-  const handleAddAppointment = () => {
+  // Adicionar agendamento
+  const handleAddAppointment = async () => {
     if (!newAppointment.petName || !newAppointment.owner || !newAppointment.date || !newAppointment.time) {
       alert("Preencha todos os campos obrigatórios!");
       return;
     }
 
-    const newId = appointments.length > 0 ? appointments[appointments.length - 1].id + 1 : 1;
-    const appointment = { ...newAppointment, id: newId };
+    try {
+      const response = await fetch("http://localhost:5159/api/Appointments/NewAppointment", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newAppointment),
+      });
 
-    setAppointments([...appointments, appointment]);
-    setShowAddModal(false);
+      if (!response.ok) throw new Error("Erro ao adicionar horário");
 
-    // reseta o formulário
-    setNewAppointment({
-      id: 0,
-      petName: "",
-      owner: "",
-      service: "Banho e Tosa",
-      time: "",
-      price: 80,
-      phone: "",
-      date: selectedDate,
-    });
+      const data = await response.json();
+      alert(data.message);
+
+      // Atualiza lista
+      setAppointments((prev) => [...prev, data.appointment]);
+      setShowAddModal(false);
+
+      // Resetar form
+      setNewAppointment({
+        id: 0,
+        petName: "",
+        owner: "",
+        service: "Banho e Tosa",
+        time: "",
+        price: 80,
+        phone: "",
+        date: selectedDate,
+        paymentMethod: "PIX"
+      });
+    } catch (error) {
+      alert("Erro ao adicionar agendamento!");
+      console.error(error);
+    }
   };
 
-  // Gera todos os dias do mês atual
+  // Excluir agendamento
+  const handleDeleteAppointment = async (id: number) => {
+    if (!confirm("Tem certeza que deseja excluir este agendamento?")) return;
+
+    try {
+      const response = await fetch(`http://localhost:5159/api/Appointments/DeleteAppointment/${id}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) throw new Error("Erro ao excluir agendamento");
+
+      const data = await response.json();
+      alert(data.message);
+
+      setAppointments((prev) => prev.filter((a) => a.id !== id));
+    } catch (error) {
+      alert("Erro ao excluir agendamento!");
+      console.error(error);
+    }
+  };
+
+  // Confirmar pagamento de assinatura
+  const handleConfirmSubscriptionPayment = async (subscriptionId: number) => {
+    try {
+      const response = await fetch(
+        `http://localhost:5159/api/Subscriptions/ConfirmPayment/${subscriptionId}`,
+        { method: "PUT" }
+      );
+
+      if (!response.ok) throw new Error("Erro ao confirmar pagamento");
+
+      const data = await response.json();
+      alert(data.message);
+
+      setSubscriptions((subs) =>
+        subs.map((s) =>
+          s.id === subscriptionId ? { ...s, paymentStatus: "pago" } : s
+        )
+      );
+    } catch (error) {
+      alert("Erro ao confirmar pagamento!");
+      console.error(error);
+    }
+  };
+
+  // Buscar todos os dados (agendamentos, serviços, planos)
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [appsRes, servRes, subsRes] = await Promise.all([
+          fetch("http://localhost:5159/api/Appointments/GetAllAppointments"),
+          fetch("http://localhost:5159/api/Services/GetAllServices"),
+          fetch("http://localhost:5159/api/Subscriptions/GetAllSubscriptions"),
+        ]);
+
+        if (!appsRes.ok || !servRes.ok){
+          throw new Error("Erro ao carregar dados");
+        }
+
+        const [appsData, servData, subsData] = await Promise.all([
+          appsRes.json(),
+          servRes.json(),
+          subsRes.json(),
+        ]);
+        
+        setAppointments(appsData.appointments || []);
+        setServices(servData.services || []);
+        setSubscriptions(subsData.subscription || []);
+      } catch (error) {
+        alert("Erro ao carregar dados do servidor!");
+        console.error(error);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  // Atualiza o preço conforme o serviço
+  const handleServiceChange = (service: string) => {
+    const selectedService = services.find((s) => s.name === service);
+    const price = selectedService ? selectedService.price : 80;
+    setNewAppointment({ ...newAppointment, service, price });
+  };
+
+  // Geração de dias do mês e cálculo de receita
   const generateMonthDays = () => {
     const year = currentDate.getFullYear();
     const month = currentDate.getMonth();
@@ -117,54 +200,31 @@ export default function CalendarView() {
     const lastDay = new Date(year, month + 1, 0);
     const days: any[] = [];
 
-    for (let i = 0; i < firstDay.getDay(); i++) {
-      days.push(null);
-    }
+    for (let i = 0; i < firstDay.getDay(); i++) days.push(null);
 
     for (let day = 1; day <= lastDay.getDate(); day++) {
       const date = new Date(year, month, day).toISOString().split("T")[0];
       const dayAppointments = appointments.filter((a) => a.date === date);
       const totalRevenue = dayAppointments.reduce((acc, a) => acc + a.price, 0);
 
-      days.push({
-        day,
-        date,
-        count: dayAppointments.length,
-        revenue: totalRevenue,
-      });
+      days.push({ day, date, count: dayAppointments.length, revenue: totalRevenue });
     }
 
     return days;
   };
 
-  // Muda o mês
   const changeMonth = (offset: number) => {
     const newDate = new Date(currentDate);
     newDate.setMonth(currentDate.getMonth() + offset);
     setCurrentDate(newDate);
   };
 
-  // Filtra os agendamentos do dia selecionado
   const filteredAppointments = appointments.filter((a) => a.date === selectedDate);
   const totalDayRevenue = filteredAppointments.reduce((acc, a) => acc + a.price, 0);
-
   const monthAppointments = appointments.filter(
     (a) => new Date(a.date).getMonth() === currentDate.getMonth()
   );
   const totalMonthRevenue = monthAppointments.reduce((acc, a) => acc + a.price, 0);
-
-  const handleDeleteAppointment = (id: number) => {
-    setAppointments((prev) => prev.filter((a) => a.id !== id));
-  };
-
-  const handleConfirmSubscriptionPayment = (subscriptionId: number) => {
-    setSubscriptions(
-      subscriptions.map((sub) =>
-        sub.id === subscriptionId ? { ...sub, paymentStatus: "pago" } : sub
-      )
-    );
-    alert("Pagamento do plano confirmado com sucesso!");
-  };
 
   return (
     <div>
@@ -173,9 +233,8 @@ export default function CalendarView() {
         onShowPlans={() => setShowSubscriptionsModal(true)}
       />
 
-      <div className={style['Container-Calendar-View']}>
-        {/* COLUNA PRINCIPAL */}
-        <div className={style['Container-Calendar-Main-Column']}>
+      <div className={style["Container-Calendar-View"]}>
+        <div className={style["Container-Calendar-Main-Column"]}>
           <CalendarHeader
             currentDate={currentDate}
             onPrevMonth={() => changeMonth(-1)}
@@ -197,18 +256,13 @@ export default function CalendarView() {
           />
         </div>
 
-        {/* SIDEBAR */}
         <div className="space-y-6">
           <MonthResume AmountPets={monthAppointments.length} Revenue={totalMonthRevenue} />
-          <PricingList
-            services={services}
-            OpenModalEdit={() => setShowEditPricesModal(true)}
-          />
+          <PricingList services={services} OpenModalEdit={() => setShowEditPricesModal(true)} />
           <AmountMothServices MonthAppointments={monthAppointments} />
         </div>
       </div>
 
-      {/* MODAIS */}
       <AddAppointmentModal
         show={showAddModal}
         onClose={() => setShowAddModal(false)}
@@ -222,11 +276,7 @@ export default function CalendarView() {
         <EditingPriceServices
           services={services}
           onClose={() => setShowEditPricesModal(false)}
-          onSave={(serviceId, newPrice) => {
-            setServices((prev) =>
-              prev.map((s) => (s.id === serviceId ? { ...s, price: newPrice } : s))
-            );
-          }}
+          onSave={handleUpdateServicePrice}
         />
       )}
 

@@ -6,7 +6,7 @@ using ProjetoBanhoETosa.Infrastructure.Context;
 
 namespace ProjetoBanhoETosa.Presentation.Controllers
 {
-    [Route("/api/[controller]")]
+    [Route("api/[controller]")]
     public class SubscriptionsController : Controller
     {
         private readonly AppDbContext _context;
@@ -15,7 +15,7 @@ namespace ProjetoBanhoETosa.Presentation.Controllers
             _context = context;
         }
 
-        [HttpGet("/GetAllSubscriptions")]
+        [HttpGet("GetAllSubscriptions")]
         public IActionResult GetAllSubscriptions()
         {
             List<Subscription> subscriptions = _context.Subscriptions.ToList();
@@ -23,10 +23,10 @@ namespace ProjetoBanhoETosa.Presentation.Controllers
             {
                 return NotFound(new { message = "Assinaturas Encontradas" });
             }
-            return Ok(new { message = "Assinaturas Encontradas", Subscription = subscriptions });
+            return Ok(new { message = "Assinaturas Encontradas", subscription = subscriptions });
         }
-        [HttpPut("/UpdateSubscription")]
-        public IActionResult UpdateSubscription([FromBody] Subscription subscription)
+        [HttpPut("ConfirmPayment")]
+        public IActionResult ConfirmPayment([FromBody] Subscription subscription)
         {
             if (subscription == null)
             {
@@ -38,7 +38,7 @@ namespace ProjetoBanhoETosa.Presentation.Controllers
 
             return Ok(new { message = "Assinatura Atualizada", Subscription = subscription });
         }
-        [HttpPost("/CreateSubscription")]
+        [HttpPost("CreateSubscription")]
         public IActionResult CreateSubscription([FromBody] Subscription subscription)
         {
             if (subscription == null)
@@ -54,7 +54,7 @@ namespace ProjetoBanhoETosa.Presentation.Controllers
                 Subscription = subscription
             });
         }
-        [HttpDelete]
+        [HttpDelete("DeleteSubscription")]
         public IActionResult DeleteSubscription([FromBody] Subscription subscription)
         {
             if (subscription == null)
