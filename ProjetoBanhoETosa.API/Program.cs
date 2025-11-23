@@ -1,6 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using ProjetoBanhoETosa.Domain.Repository;
 using ProjetoBanhoETosa.Infrastructure.Context;
+using ProjetoBanhoETosa.Infrastructure.Repository;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,6 +25,9 @@ builder.Services.AddDbContext<AppDbContext>(options =>
         b => b.MigrationsAssembly("ProjetoBanhoETosa.Infrastructure")
     )
 );
+
+builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
