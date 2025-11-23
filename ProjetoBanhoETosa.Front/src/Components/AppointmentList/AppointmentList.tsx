@@ -1,8 +1,7 @@
-import { Dog, Clock, Scissors, DollarSign } from "lucide-react";
-import type {AppointmentListProps } from "../../interfaces/Appointment";
+import type { AppointmentListProps } from "../../interfaces/Appointment";
 import styles from "./AppointmentList.module.css";
-
-
+import AppointmentCard from "../AppointmentCard/AppointmentCard"; // Import the new component
+import { Dog } from "lucide-react"; // Only Dog icon is needed here for empty state
 
 export default function AppointmentList({
   appointments,
@@ -28,40 +27,7 @@ export default function AppointmentList({
       ) : (
         <div className={styles.list}>
           {appointments.map((apt) => (
-            <div key={apt.id} className={styles.card}>
-              <div className={styles.cardContent}>
-                <div className={styles.details}>
-                  <div className={styles.header}>
-                    <Dog className={styles.iconBlue} />
-                    <h4 className={styles.petName}>{apt.petName}</h4>
-                    <span className={styles.owner}>({apt.owner})</span>
-                  </div>
-
-                  <div className={styles.info}>
-                    <span className="flex items-center gap-1">
-                      <Clock className={styles.icon} />
-                      {apt.time}
-                    </span>
-
-                    <span className="flex items-center gap-1">
-                      <Scissors className={styles.icon} />
-                      {apt.service}
-                    </span>
-
-                    <span className={styles.price}>
-                      <DollarSign className={styles.icon} />
-                      R$ {apt.price.toFixed(2)}
-                    </span>
-
-                    <span>📞 {apt.phone}</span>
-                  </div>
-                </div>
-
-                <button onClick={() => onDelete(apt.id)} className={styles.cancelBtn}>
-                  Cancelar
-                </button>
-              </div>
-            </div>
+            <AppointmentCard key={apt.id} appointment={apt} onDelete={onDelete} />
           ))}
 
           <div className={styles.total}>
