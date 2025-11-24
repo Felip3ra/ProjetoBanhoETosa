@@ -8,7 +8,7 @@ import EditingPriceServices from "../../modals/EditingPriceServices/EditingPrice
 import PlanManagement from "../../modals/PlanManagement/PlanManagement";
 import MonthResume from "../../MonthResume/MonthResume";
 import PricingList from "../../PricingList/PricingList";
-import AmountMothServices from "../../modals/AmountMonthServices/AmountMothServices";
+import AmountMothServices from "../../modals/AmountMonthServices/AmountMonthServices";
 import Header from "../../Header/Header";
 import style from "./CalendarView.module.css";
 import { useAppointments } from "../../../hooks/useAppointments";
@@ -20,8 +20,6 @@ import { useNewAppointmentForm } from "../../../hooks/useNewAppointmentForm"; //
 export default function CalendarView() {
   const [ShowEditPricesModal, setShowEditPricesModal] = useState(false);
   const [showSubscriptionsModal, setShowSubscriptionsModal] = useState(false);
-  const [editingService, setEditingService] = useState<any>(null);
-  const [tempPrice, setTempPrice] = useState("");
 
   const [showAddModal, setShowAddModal] = useState(false);
 
@@ -44,8 +42,6 @@ export default function CalendarView() {
   const handleUpdateServicePrice = async (serviceId: number, newPrice: number) => {
     const success = await updateServicePrice(serviceId, newPrice);
     if (success) {
-      setEditingService(null);
-      setTempPrice("");
       refetchServices(); // Re-fetch services to ensure UI is updated
     }
   };
@@ -87,12 +83,7 @@ export default function CalendarView() {
 
 
 
-  // Atualiza o preço conforme o serviço
-  const handleServiceChange = (service: string) => {
-    const selectedService = services.find((s) => s.name === service);
-    const price = selectedService ? selectedService.price : 80;
-    setNewAppointment({ ...newAppointment, service, price });
-  };
+
 
   // Geração de dias do mês e cálculo de receita
 

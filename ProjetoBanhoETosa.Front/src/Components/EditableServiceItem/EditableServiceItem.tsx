@@ -6,8 +6,7 @@ interface Service {
   id: number;
   name: string;
   price: number;
-  duration: number;
-  active: boolean;
+  durationInMinutes: number;
 }
 
 interface EditableServiceItemProps {
@@ -50,7 +49,7 @@ export default function EditableServiceItem({ service, onSaveItem }: EditableSer
       <div className={styles["Container-Service-Item-Box"]}>
         <div>
           <h4 className={styles["Label-Service-Name"]}>{service.name}</h4>
-          <span className={styles["Label-Service-Duration"]}>{service.duration} min</span>
+          <span className={styles["Label-Service-Duration"]}>{service.durationInMinutes} min</span>
         </div>
         {isEditing ? (
           <div className={styles["Container-Input"]}>

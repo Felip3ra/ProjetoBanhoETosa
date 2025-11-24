@@ -2,11 +2,14 @@ import { useState, useEffect, useCallback } from "react";
 
 interface Subscription {
   id: number;
-  clientName: string;
-  plan: string;
+  customerName: string;
+  planName: string;
   startDate: string;
   endDate: string;
   paymentStatus: string;
+  servicesUsed: number;
+  servicesAvailable: number;
+  price: number;
 }
 
 interface UseSubscriptions {

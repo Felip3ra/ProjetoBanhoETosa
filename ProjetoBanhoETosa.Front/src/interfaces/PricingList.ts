@@ -3,8 +3,7 @@ export interface PricingListProps {
     id: number;
     name: string;
     price: number;
-    duration: number;
-    active: boolean;
+    durationInMinutes: number;
   }[];
   OpenModalEdit: () => void;
 }
