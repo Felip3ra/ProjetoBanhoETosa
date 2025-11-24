@@ -19,6 +19,7 @@ export const useCalendar = (): UseCalendar => {
   }, [currentDate]);
 
   const generateMonthDays = useCallback((appointments: any[]) => {
+    if (!Array.isArray(appointments)) return []; // Defensive check
     const year = currentDate.getFullYear();
     const month = currentDate.getMonth();
     const firstDay = new Date(year, month, 1);
@@ -40,7 +41,7 @@ export const useCalendar = (): UseCalendar => {
     }
 
     return days;
-  }, [currentDate, appointments]); // appointments is a dependency here because it's used to calculate count and revenue for each day
+  }, [currentDate]); // appointments is a dependency here because it's used to calculate count and revenue for each day
 
   return {
     currentDate,

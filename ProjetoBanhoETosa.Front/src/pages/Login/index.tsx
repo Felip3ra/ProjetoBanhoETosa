@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { Dog, Plus } from "lucide-react";
 import styles from "./Login.module.css";
 import { motion } from "framer-motion";
+
 export default function Login() {
 
   const [loading, setLoading] = useState(false);
@@ -119,22 +120,19 @@ export default function Login() {
               Label="Senha"
             />
 
-            <motion.button
-              whileTap={{ scale: 0.95 }}
+            <button
               onClick={handleLogin}
               disabled={loading}
               className={`${styles["Button-Login"]} relative flex items-center justify-center overflow-hidden disabled:opacity-60`}
             >
               {loading ? (
-                <motion.div
-                  className="w-5 h-5 border-2 border-white border-t-transparent rounded-full"
-                  animate={{ rotate: 360 }}
-                  transition={{ repeat: Infinity, duration: 0.8, ease: "linear" }}
+                <div
+                  className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"
                 />
               ) : (
                 "Entrar"
               )}
-            </motion.button>
+            </button>
 
             <div className="relative my-6">
               <div className="absolute inset-0 flex items-center">
@@ -167,7 +165,7 @@ export default function Login() {
 
             <TextInput
               Type="email"
-              Value={loginForm.email}
+              Value={registerForm.email}
               PlaceHolder="seu@email.com"
               OnChange={(e) => setRegisterForm({ ...registerForm, email: e.target.value })}
               Label="Email"
@@ -182,7 +180,7 @@ export default function Login() {
             />
             <TextInput
               Type="password"
-              Value={registerForm.password}
+              Value={registerForm.confirmPassword}
               OnChange={(e) => setRegisterForm({ ...registerForm, confirmPassword: e.target.value })}
               PlaceHolder="Mínimo 6 caracteres"
               Label="Confirmar Senha"
@@ -198,22 +196,19 @@ export default function Login() {
             )}
 
 
-            <motion.button
-              whileTap={{ scale: 0.95 }}
+            <button
               onClick={handleRegister}
               disabled={loading}
               className={`${styles['Button-Create-Account']} relative flex items-center justify-center overflow-hidden disabled:opacity-60`}
             >
               {loading ? (
-                <motion.div
-                  className="w-5 h-5 border-2 border-white border-t-transparent rounded-full"
-                  animate={{ rotate: 360 }}
-                  transition={{ repeat: Infinity, duration: 0.8, ease: "linear" }}
+                <div
+                  className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"
                 />
               ) : (
                 "Criar Conta"
               )}
-            </motion.button>
+            </button>
 
             <div className={styles['Container-Account-Exists']}>
               <p>

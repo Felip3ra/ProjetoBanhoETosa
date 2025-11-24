@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { subscriptionService } from "../services/subscriptionService"; // Import the new service
 
 interface Subscription {
   id: number;
@@ -29,15 +30,11 @@ export const useSubscriptions = (): UseSubscriptions => {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch("http://localhost:5159/api/Subscriptions/GetAllSubscriptions");
-      if (!response.ok) {
-        throw new Error("Erro ao carregar assinaturas");
-      }
-      const data = await response.json();
-      setSubscriptions(data.subscription || []);
-    } catch (err) {
+      const fetchedSubscriptions = await subscriptionService.getAllSubscriptions();
+      setSubscriptions(fetchedSubscriptions);
+    } catch (err: any) {
       console.error("Failed to fetch subscriptions:", err);
-      setError("Erro ao carregar assinaturas do servidor!");
+      setError(err.message || "Erro ao carregar assinaturas do servidor!");
     } finally {
       setLoading(false);
     }
@@ -49,27 +46,16 @@ export const useSubscriptions = (): UseSubscriptions => {
 
   const confirmSubscriptionPayment = useCallback(async (subscriptionId: number): Promise<boolean> => {
     try {
-      const response = await fetch(
-        `http://localhost:5159/api/Subscriptions/ConfirmPayment/${subscriptionId}`,
-        { method: "PUT" }
-      );
-
-      if (!response.ok) {
-        throw new Error("Erro ao confirmar pagamento");
-      }
-
-      const data = await response.json();
-      alert(data.message);
-
+      await subscriptionService.confirmSubscriptionPayment(subscriptionId);
       setSubscriptions((prev) =>
         prev.map((s) =>
           s.id === subscriptionId ? { ...s, paymentStatus: "pago" } : s
         )
       );
       return true;
-    } catch (err) {
+    } catch (err: any) {
       console.error("Failed to confirm payment:", err);
-      setError("Erro ao confirmar pagamento!");
+      setError(err.message || "Erro ao confirmar pagamento!");
       return false;
     }
   }, []);

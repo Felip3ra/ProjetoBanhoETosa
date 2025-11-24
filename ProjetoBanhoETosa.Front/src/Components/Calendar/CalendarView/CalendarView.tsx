@@ -15,7 +15,8 @@ import { useAppointments } from "../../../hooks/useAppointments";
 import { useServices } from "../../../hooks/useServices";
 import { useSubscriptions } from "../../../hooks/useSubscriptions";
 import { useCalendar } from "../../../hooks/useCalendar";
-import { useNewAppointmentForm } from "../../../hooks/useNewAppointmentForm"; // Import the new hook
+import { useNewAppointmentForm } from "../../../hooks/useNewAppointmentForm";
+import LoadingSpinner from "../../common/LoadingSpinner"; // Import the new LoadingSpinner component
 
 export default function CalendarView() {
   const [ShowEditPricesModal, setShowEditPricesModal] = useState(false);
@@ -23,9 +24,12 @@ export default function CalendarView() {
 
   const [showAddModal, setShowAddModal] = useState(false);
 
-  const { appointments, addAppointment, deleteAppointment, refetchAppointments } = useAppointments();
-  const { services, updateServicePrice, refetchServices } = useServices();
-  const { subscriptions, confirmSubscriptionPayment, refetchSubscriptions } = useSubscriptions();
+  const { appointments: appointmentsFromHook, addAppointment, deleteAppointment, refetchAppointments, loading: loadingAppointments, error: errorAppointments } = useAppointments();
+  const appointments = appointmentsFromHook || []; // Defensive check
+  const { services: servicesFromHook, updateServicePrice, refetchServices, loading: loadingServices, error: errorServices } = useServices();
+  const services = servicesFromHook || []; // Defensive check
+  const { subscriptions: subscriptionsFromHook, confirmSubscriptionPayment, refetchSubscriptions, loading: loadingSubscriptions, error: errorSubscriptions } = useSubscriptions();
+  const subscriptions = subscriptionsFromHook || []; // Defensive check
   const { currentDate, selectedDate, changeMonth, generateMonthDays, setSelectedDate } = useCalendar();
   const { newAppointment, setNewAppointment, handleServiceChange, resetForm } = useNewAppointmentForm(services, selectedDate);
 
@@ -95,6 +99,19 @@ export default function CalendarView() {
   );
   const totalMonthRevenue = monthAppointments.reduce((acc, a) => acc + a.price, 0);
 
+  const isLoading = loadingAppointments || loadingServices || loadingSubscriptions;
+  const hasError = errorAppointments || errorServices || errorSubscriptions;
+
+  if (hasError) {
+    return (
+      <div style={{ padding: '20px', textAlign: 'center', color: 'red' }}>
+        <h2>Erro ao carregar dados!</h2>
+        <p>{errorAppointments || errorServices || errorSubscriptions}</p>
+        <p>Por favor, tente novamente mais tarde.</p>
+      </div>
+    );
+  }
+
   return (
     <div>
       <Header
@@ -102,35 +119,39 @@ export default function CalendarView() {
         onShowPlans={() => setShowSubscriptionsModal(true)}
       />
 
-      <div className={style["Container-Calendar-View"]}>
-        <div className={style["Container-Calendar-Main-Column"]}>
-          <CalendarHeader
-            currentDate={currentDate}
-            onPrevMonth={() => changeMonth(-1)}
-            onNextMonth={() => changeMonth(1)}
-            onAddAppointment={() => setShowAddModal(true)}
-          />
+      {isLoading ? (
+        <LoadingSpinner />
+      ) : (
+        <div className={style["Container-Calendar-View"]}>
+          <div className={style["Container-Calendar-Main-Column"]}>
+            <CalendarHeader
+              currentDate={currentDate}
+              onPrevMonth={() => changeMonth(-1)}
+              onNextMonth={() => changeMonth(1)}
+              onAddAppointment={() => setShowAddModal(true)}
+            />
 
-          <CalendarGrid
-            days={generateMonthDays(appointments)}
-            selectedDate={selectedDate}
-            onSelectDate={setSelectedDate}
-          />
+            <CalendarGrid
+              days={generateMonthDays(appointments)}
+              selectedDate={selectedDate}
+              onSelectDate={setSelectedDate}
+            />
 
-          <AppointmentList
-            appointments={filteredAppointments}
-            selectedDate={selectedDate}
-            totalRevenue={totalDayRevenue}
-            onDelete={handleDeleteAppointment}
-          />
+            <AppointmentList
+              appointments={filteredAppointments}
+              selectedDate={selectedDate}
+              totalRevenue={totalDayRevenue}
+              onDelete={handleDeleteAppointment}
+            />
+          </div>
+
+          <div className="space-y-6">
+            <MonthResume AmountPets={monthAppointments.length} Revenue={totalMonthRevenue} />
+            <PricingList services={services} OpenModalEdit={() => setShowEditPricesModal(true)} />
+            <AmountMothServices MonthAppointments={monthAppointments} />
+          </div>
         </div>
-
-        <div className="space-y-6">
-          <MonthResume AmountPets={monthAppointments.length} Revenue={totalMonthRevenue} />
-          <PricingList services={services} OpenModalEdit={() => setShowEditPricesModal(true)} />
-          <AmountMothServices MonthAppointments={monthAppointments} />
-        </div>
-      </div>
+      )}
 
       <AddAppointmentModal
         show={showAddModal}

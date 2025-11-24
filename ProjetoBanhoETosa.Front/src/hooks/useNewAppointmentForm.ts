@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { Appointment } from "../interfaces/Appointment";
+import type { Appointment } from "../interfaces/Appointment";
 
 interface Service {
     id: number;

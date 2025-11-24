@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { serviceService } from "../services/serviceService"; // Import the new service
 
 interface Service {
   id: number;
@@ -24,15 +25,11 @@ export const useServices = (): UseServices => {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch("http://localhost:5159/api/Services/GetAllServices");
-      if (!response.ok) {
-        throw new Error("Erro ao carregar serviços");
-      }
-      const data = await response.json();
-      setServices(data.services || []);
-    } catch (err) {
+      const fetchedServices = await serviceService.getAllServices();
+      setServices(fetchedServices);
+    } catch (err: any) {
       console.error("Failed to fetch services:", err);
-      setError("Erro ao carregar serviços do servidor!");
+      setError(err.message || "Erro ao carregar serviços do servidor!");
     } finally {
       setLoading(false);
     }
@@ -49,24 +46,12 @@ export const useServices = (): UseServices => {
     }
 
     try {
-      const response = await fetch(`http://localhost:5159/api/Services/UpdateService/${serviceId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newPrice),
-      });
-
-      if (!response.ok) {
-        throw new Error("Erro ao atualizar serviço");
-      }
-
-      const data = await response.json();
-      alert(data.message);
-
+      await serviceService.updateServicePrice(serviceId, newPrice);
       setServices((prev) => prev.map((s) => (s.id === serviceId ? { ...s, price: newPrice } : s)));
       return true;
-    } catch (err) {
+    } catch (err: any) {
       console.error("Failed to update service price:", err);
-      setError("Erro ao atualizar o serviço!");
+      setError(err.message || "Erro ao atualizar o serviço!");
       return false;
     }
   }, []);

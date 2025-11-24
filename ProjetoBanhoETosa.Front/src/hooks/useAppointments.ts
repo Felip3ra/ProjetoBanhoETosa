@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
-import { Appointment } from "../interfaces/Appointment";
+import type { Appointment } from "../interfaces/Appointment";
+import { appointmentService } from "../services/appointmentService"; // Import the new service
 
 interface UseAppointments {
   appointments: Appointment[];
@@ -19,15 +20,11 @@ export const useAppointments = (): UseAppointments => {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch("http://localhost:5159/api/Appointments/GetAllAppointments");
-      if (!response.ok) {
-        throw new Error("Erro ao carregar agendamentos");
-      }
-      const data = await response.json();
-      setAppointments(data.appointments || []);
-    } catch (err) {
+      const fetchedAppointments = await appointmentService.getAllAppointments();
+      setAppointments(fetchedAppointments);
+    } catch (err: any) {
       console.error("Failed to fetch appointments:", err);
-      setError("Erro ao carregar agendamentos do servidor!");
+      setError(err.message || "Erro ao carregar agendamentos do servidor!");
     } finally {
       setLoading(false);
     }
@@ -39,22 +36,12 @@ export const useAppointments = (): UseAppointments => {
 
   const addAppointment = useCallback(async (newAppointmentData: Appointment): Promise<boolean> => {
     try {
-      const response = await fetch("http://localhost:5159/api/Appointments/NewAppointment", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newAppointmentData),
-      });
-
-      if (!response.ok) {
-        throw new Error("Erro ao adicionar agendamento");
-      }
-      const data = await response.json();
-      alert(data.message);
-      setAppointments((prev) => [...prev, data.appointment]);
+      const addedAppointment = await appointmentService.addAppointment(newAppointmentData);
+      setAppointments((prev) => [...prev, addedAppointment]);
       return true;
-    } catch (err) {
+    } catch (err: any) {
       console.error("Failed to add appointment:", err);
-      setError("Erro ao adicionar agendamento!");
+      setError(err.message || "Erro ao adicionar agendamento!");
       return false;
     }
   }, []);
@@ -64,20 +51,12 @@ export const useAppointments = (): UseAppointments => {
       return false;
     }
     try {
-      const response = await fetch(`http://localhost:5159/api/Appointments/DeleteAppointment/${id}`, {
-        method: "DELETE",
-      });
-
-      if (!response.ok) {
-        throw new Error("Erro ao excluir agendamento");
-      }
-      const data = await response.json();
-      alert(data.message);
+      await appointmentService.deleteAppointment(id);
       setAppointments((prev) => prev.filter((a) => a.id !== id));
       return true;
-    } catch (err) {
+    } catch (err: any) {
       console.error("Failed to delete appointment:", err);
-      setError("Erro ao excluir agendamento!");
+      setError(err.message || "Erro ao excluir agendamento!");
       return false;
     }
   }, []);

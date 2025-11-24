@@ -1,6 +1,6 @@
 import { Dog, Clock, Scissors, DollarSign } from "lucide-react";
 import styles from "./AppointmentCard.module.css";
-import { Appointment } from "../../interfaces/Appointment"; // Assuming Appointment interface is available
+import type { Appointment } from "../../interfaces/Appointment"; // Assuming Appointment interface is available
 
 interface AppointmentCardProps {
   appointment: Appointment;

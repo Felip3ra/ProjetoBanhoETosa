@@ -1,4 +1,4 @@
-import { Appointment } from "../interfaces/Appointment";
+import type { Appointment } from "../interfaces/Appointment";
 
 interface ServiceCounts {
   [key: string]: number;
