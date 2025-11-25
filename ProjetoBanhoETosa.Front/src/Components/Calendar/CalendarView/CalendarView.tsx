@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import CalendarHeader from "../CalendarHeader/CalendarHeader";
 import CalendarGrid from "../CalendarGrid/CalendarGrid";
 import AppointmentList from "../../AppointmentList/AppointmentList";
@@ -24,11 +24,11 @@ export default function CalendarView() {
 
   const [showAddModal, setShowAddModal] = useState(false);
 
-  const { appointments: appointmentsFromHook, addAppointment, deleteAppointment, refetchAppointments, loading: loadingAppointments, error: errorAppointments } = useAppointments();
+  const { appointments: appointmentsFromHook, addAppointment, deleteAppointment, refetchAppointments, loading: loadingAppointments, isAdding, isDeleting, error: errorAppointments } = useAppointments();
   const appointments = appointmentsFromHook || []; // Defensive check
-  const { services: servicesFromHook, updateServicePrice, refetchServices, loading: loadingServices, error: errorServices } = useServices();
+  const { services: servicesFromHook, updateServicePrice, refetchServices, loading: loadingServices, isUpdating, error: errorServices } = useServices();
   const services = servicesFromHook || []; // Defensive check
-  const { subscriptions: subscriptionsFromHook, confirmSubscriptionPayment, refetchSubscriptions, loading: loadingSubscriptions, error: errorSubscriptions } = useSubscriptions();
+  const { subscriptions: subscriptionsFromHook, confirmSubscriptionPayment, refetchSubscriptions, loading: loadingSubscriptions, isConfirmingPayment, error: errorSubscriptions } = useSubscriptions();
   const subscriptions = subscriptionsFromHook || []; // Defensive check
   const { currentDate, selectedDate, changeMonth, generateMonthDays, setSelectedDate } = useCalendar();
   const { newAppointment, setNewAppointment, handleServiceChange, resetForm } = useNewAppointmentForm(services, selectedDate);
@@ -46,7 +46,7 @@ export default function CalendarView() {
   const handleUpdateServicePrice = async (serviceId: number, newPrice: number) => {
     const success = await updateServicePrice(serviceId, newPrice);
     if (success) {
-      refetchServices(); // Re-fetch services to ensure UI is updated
+      // refetchServices(); // Re-fetch services to ensure UI is updated
     }
   };
 
@@ -65,23 +65,19 @@ export default function CalendarView() {
     if (success) {
       setShowAddModal(false);
       resetForm(); // Use resetForm from the hook
-      refetchAppointments(); // Re-fetch appointments to ensure UI is updated
     }
   };
 
   // Excluir agendamento
   const handleDeleteAppointment = async (id: number) => {
-    const success = await deleteAppointment(id);
-    if (success) {
-      refetchAppointments(); // Re-fetch appointments to ensure UI is updated
-    }
+    await deleteAppointment(id);
   };
 
   // Confirmar pagamento de assinatura
   const handleConfirmSubscriptionPayment = async (subscriptionId: number) => {
     const success = await confirmSubscriptionPayment(subscriptionId);
     if (success) {
-      refetchSubscriptions(); // Re-fetch subscriptions to ensure UI is updated
+      // refetchSubscriptions(); // Re-fetch subscriptions to ensure UI is updated
     }
   };
 
@@ -99,7 +95,7 @@ export default function CalendarView() {
   );
   const totalMonthRevenue = monthAppointments.reduce((acc, a) => acc + a.price, 0);
 
-  const isLoading = loadingAppointments || loadingServices || loadingSubscriptions;
+  const isLoading = loadingAppointments || loadingServices || loadingSubscriptions || isAdding || isDeleting || isUpdating || isConfirmingPayment;
   const hasError = errorAppointments || errorServices || errorSubscriptions;
 
   if (hasError) {

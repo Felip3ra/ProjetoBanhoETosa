@@ -15,9 +15,7 @@ namespace ProjetoBanhoETosa.Domain.Models
         [Column(TypeName = "decimal(10,2)")]
         public decimal Price { get; set; }
         public int ServicesAvailable { get; set; }
-        [Column(TypeName = "datetime2")]
         public DateTime created_at { get; set; } = DateTime.Now;
-        [Column(TypeName = "datetime2")]
         public DateTime? updated_at { get; set; } = DateTime.Now;
     }
 }

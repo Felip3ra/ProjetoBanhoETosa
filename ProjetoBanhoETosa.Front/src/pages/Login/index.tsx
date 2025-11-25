@@ -3,33 +3,29 @@ import React, { useState } from "react";
 import { Dog, Plus } from "lucide-react";
 import styles from "./Login.module.css";
 import { motion } from "framer-motion";
+import { useAuth } from "../../hooks/useAuth";
+import type { UserDTO } from "../../interfaces/User";
 
 export default function Login() {
-
-  const [loading, setLoading] = useState(false);
-  const [loginForm, setLoginForm] = useState({ email: '', password: '' });
-  const [registerForm, setRegisterForm] = useState({
+  const { loading, error, login, register } = useAuth();
+  const [loginForm, setLoginForm] = useState<UserDTO>({ email: '', password: '' });
+  const [registerForm, setRegisterForm] = useState<UserDTO>({
     name: '',
     email: '',
     password: '',
     confirmPassword: '',
-    role: 'admin'
   });
-  const [systemUsers, setSystemUsers] = useState([
-    { id: 1, email: 'admin@petshop.com', password: 'admin123', name: 'Administrador', role: 'admin' },
-    { id: 2, email: 'funcionario@petshop.com', password: 'func123', name: 'Funcionário', role: 'funcionario' }
-  ]);
-  const handleLogin = () => {
-    const user = systemUsers.find(u => u.email === loginForm.email && u.password === loginForm.password);
-    if (user) {
+  const [authView, setAuthView] = useState('login');
 
+  const handleLogin = async () => {
+    const success = await login(loginForm);
+    if (success) {
       setLoginForm({ email: '', password: '' });
-    } else {
-      alert('Email ou senha incorretos!');
+      // Redirect or perform other actions after successful login
     }
   };
 
-  const handleRegister = () => {
+  const handleRegister = async () => {
     if (!registerForm.name || !registerForm.email || !registerForm.password || !registerForm.confirmPassword) {
       alert('Por favor, preencha todos os campos!');
       return;
@@ -45,30 +41,15 @@ export default function Login() {
       return;
     }
 
-    const emailExists = systemUsers.find(u => u.email === registerForm.email);
-    if (emailExists) {
-      alert('Este email já está cadastrado! Por favor, faça login.');
-      return;
+    const success = await register(registerForm);
+    if (success) {
+      setRegisterForm({ name: '', email: '', password: '', confirmPassword: '' });
+      alert('Cadastro realizado com sucesso!');
+      setAuthView('login'); // Redirect to login after successful registration
     }
-
-    const newId = Math.max(...systemUsers.map(u => u.id), 0) + 1;
-    const newUser = {
-      id: newId,
-      name: registerForm.name,
-      email: registerForm.email,
-      password: registerForm.password,
-      role: systemUsers.length === 0 ? 'admin' : registerForm.role
-    };
-
-    setSystemUsers([...systemUsers, newUser]);
-
-    setRegisterForm({ name: '', email: '', password: '', confirmPassword: '', role: 'admin' });
-    alert('Cadastro realizado com sucesso!');
   };
-  const [authView, setAuthView] = useState('login');
 
   return (
-
     <div className={styles['Container']}>
       <div className={styles['Container-Background']}>
         <div className={styles['Container-Header-Icon']}>
@@ -78,7 +59,6 @@ export default function Login() {
         </div>
         <h1 className={styles.Tittle}>Petshop Manager</h1>
         <p className={styles.Subtittle}>Sistema de Agendamentos</p>
-
 
         <div className={styles['Tab-Buttons']}>
           <button
@@ -101,9 +81,10 @@ export default function Login() {
           </button>
         </div>
 
+        {error && <p className={styles.errorMessage}>{error}</p>}
+
         {authView === 'login' ? (
           <div className="space-y-4">
-
             <TextInput
               Type="email"
               Value={loginForm.email}
@@ -153,12 +134,10 @@ export default function Login() {
           </div>
         ) : (
           <div className="space-y-4">
-
             <TextInput
               Type="text"
               Value={registerForm.name}
               OnChange={(e) => setRegisterForm({ ...registerForm, name: e.target.value })}
-
               PlaceHolder="João Silva"
               Label="Nome"
             />
@@ -185,16 +164,6 @@ export default function Login() {
               PlaceHolder="Mínimo 6 caracteres"
               Label="Confirmar Senha"
             />
-
-
-            {systemUsers.length === 0 && (
-              <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
-                <p className="text-sm text-blue-800">
-                  🎉 <strong>Primeira conta!</strong> Você será cadastrado como Administrador.
-                </p>
-              </div>
-            )}
-
 
             <button
               onClick={handleRegister}
@@ -223,11 +192,7 @@ export default function Login() {
             </div>
           </div>
         )}
-
-
       </div>
     </div>
-
-
   );
 }

@@ -16,9 +16,7 @@ namespace ProjetoBanhoETosa.Domain.Models
         public string Email { get; set; }
         [Required]
         public string Password { get; set; }
-        [Column(TypeName = "datetime2")]
         public DateTime created_at { get; set; } = DateTime.Now;
-        [Column(TypeName = "datetime2")]
         public DateTime? updated_at { get; set; } = DateTime.Now;
     }
 }

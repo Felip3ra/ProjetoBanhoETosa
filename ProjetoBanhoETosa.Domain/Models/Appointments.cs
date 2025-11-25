@@ -30,7 +30,6 @@ namespace ProjetoBanhoETosa.Domain.Models
         public string Phone { get; set; }
         [ForeignKey(nameof(Service))]
         public int ServiceId { get; set; }
-        [Column(TypeName = "datetime2")]
         public DateTime AppointmentDate { get; set; }
         public TimeOnly AppointmentTime { get; set; }
         [Column(TypeName = "decimal(10,2)")]
@@ -39,13 +38,10 @@ namespace ProjetoBanhoETosa.Domain.Models
         public PaymentMethod PaymentMethod { get; set; }
         [Required]
         public PaymentStatus PaymentStatus { get; set; } = PaymentStatus.Pendente;
-        [Column(TypeName = "bit")]
         public bool HasSubscription { get; set; }
         [ForeignKey(nameof(Subscription))]
         public int? SubscriptionId { get; set; }
-        [Column(TypeName = "datetime2")]
         public DateTime CreatedAt { get; set; } = DateTime.Now;
-        [Column(TypeName = "datetime2")]
         public DateTime? UpdatedAt { get; set; } = DateTime.Now;
 
         public Service Service { get; set; }

@@ -14,9 +14,7 @@ namespace ProjetoBanhoETosa.Domain.Models
         [EmailAddress]
         public string? Email { get; set; }
         public string PlanName { get; set; }
-        [Column(TypeName = "datetime2")]
         public DateTime StartDate { get; set; }
-        [Column(TypeName = "datetime2")]
         public DateTime EndDate { get; set; }
         [Column(TypeName = "decimal(10,2)")]
         public decimal Price { get; set; }
@@ -24,9 +22,7 @@ namespace ProjetoBanhoETosa.Domain.Models
         public int ServicesAvailable { get; set; }
         public string PaymentStatus { get; set; }
         public string PaymentMethod { get; set; }
-        [Column(TypeName = "datetime2")]
         public DateTime CreatedAt { get; set; } = DateTime.Now;
-        [Column(TypeName = "datetime2")]
         public DateTime? UpdatedAt { get; set; } = DateTime.Now;
 
     }

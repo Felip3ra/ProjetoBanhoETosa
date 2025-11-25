@@ -16,6 +16,7 @@ interface Subscription {
 interface UseSubscriptions {
   subscriptions: Subscription[];
   loading: boolean;
+  isConfirmingPayment: boolean;
   error: string | null;
   confirmSubscriptionPayment: (subscriptionId: number) => Promise<boolean>;
   refetchSubscriptions: () => Promise<void>;
@@ -24,6 +25,7 @@ interface UseSubscriptions {
 export const useSubscriptions = (): UseSubscriptions => {
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [isConfirmingPayment, setIsConfirmingPayment] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
   const fetchSubscriptions = useCallback(async () => {
@@ -45,6 +47,8 @@ export const useSubscriptions = (): UseSubscriptions => {
   }, [fetchSubscriptions]);
 
   const confirmSubscriptionPayment = useCallback(async (subscriptionId: number): Promise<boolean> => {
+    setIsConfirmingPayment(true);
+    setError(null);
     try {
       await subscriptionService.confirmSubscriptionPayment(subscriptionId);
       setSubscriptions((prev) =>
@@ -52,13 +56,16 @@ export const useSubscriptions = (): UseSubscriptions => {
           s.id === subscriptionId ? { ...s, paymentStatus: "pago" } : s
         )
       );
+      await fetchSubscriptions();
       return true;
     } catch (err: any) {
       console.error("Failed to confirm payment:", err);
       setError(err.message || "Erro ao confirmar pagamento!");
       return false;
+    } finally {
+      setIsConfirmingPayment(false);
     }
-  }, []);
+  }, [fetchSubscriptions]);
 
-  return { subscriptions, loading, error, confirmSubscriptionPayment, refetchSubscriptions: fetchSubscriptions };
+  return { subscriptions, loading, isConfirmingPayment, error, confirmSubscriptionPayment, refetchSubscriptions: fetchSubscriptions };
 };
