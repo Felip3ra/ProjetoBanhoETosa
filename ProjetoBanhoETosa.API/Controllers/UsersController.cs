@@ -1,7 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using ProjetoBanhoETosa.Domain.Models;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using ProjetoBanhoETosa.Application;
+using ProjetoBanhoETosa.Application.DTO;
 using ProjetoBanhoETosa.Infrastructure.Context;
-using ProjetoBanhoETosa.Presentation.DTO;
 
 namespace ProjetoBanhoETosa.Presentation.Controllers
 {
@@ -9,53 +10,56 @@ namespace ProjetoBanhoETosa.Presentation.Controllers
     public class UsersController : Controller
     {
         private readonly AppDbContext _context;
-
-        public UsersController(AppDbContext context)
+        private readonly IUserService _userService;
+        public UsersController(AppDbContext context, IUserService userService)
         {
             _context = context;
+            _userService = userService;
         }
-        [HttpGet]
-        public IActionResult Index()
+        
+        [HttpPost("Autentication")]
+        public async Task<IActionResult> AutenticationLogin([FromBody] UserDTO userDTO)
         {
-            return Ok();
-        }
-        [HttpPost("/Autentication")]
-        public IActionResult AutenticationLogin([FromBody] UserDTO userDTO)
-        {
-            User login = _context.Users.FirstOrDefault(u => u.Email == userDTO.Email && u.Password == userDTO.Password);
-            if (login != null)
+            if (userDTO == null)
             {
-                UserDTO userResponse = new UserDTO
-                {
-                    Name = login.Name,
-                    Email = login.Email,
-                    Password = login.Password
-                };
-                return Ok(new { message = "Login successful", user = userResponse });
+                return Unauthorized(new { message = "Invalid Form" });
+            }
+
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == userDTO.Email);
+            if (user == null)
+            {
+                return Unauthorized(new { message = "Invalid email or password" });
+            }
+
+            UserDTO userValidated = await _userService.VerificaUserAsync(userDTO);
+            if (userValidated == null)
+            {
+                return Unauthorized(new { message = "Invalid email or password" });
             }
             
-            return Unauthorized(new { message = "Invalid email or password" });
+            return Ok(new
+            {
+                message = "User is valid",
+                user = userValidated
+            });
             
         }
-        [HttpPost("/Register")]
-        public IActionResult Register([FromBody] UserDTO userDTO)
+        [HttpPost("Register")]
+        public async Task<IActionResult> Register([FromBody] UserDTO userDTO)
         {
-            User login = _context.Users.FirstOrDefault(u => u.Email == userDTO.Email);
-            if (login != null)
+            if (userDTO == null)
             {
-                return Unauthorized(new { message = "This email has already exist" });
+                return Unauthorized(new { message = "Invalid Form" });
             }
-            User newUser = new User
+            
+            bool registrado = await _userService.RegistraUserAsync(userDTO);
+            if (!registrado)
             {
-                Name = userDTO.Name,
-                Email = userDTO.Email,
-                Password = userDTO.Password,
-                created_at = DateTime.Now,
-                updated_at = DateTime.Now
-            };
-            _context.Users.Add(newUser);
-            _context.SaveChanges();
-            return Ok(new { message = "User registered successfully", user = userDTO});
+                return BadRequest(new { message = "Error registering user" });
+            }
+            var createdUser = await _context.Users.FirstOrDefaultAsync(u => u.Email == userDTO.Email);
+            
+            return Ok(new { message = "User registered successfully", user = userDTO });
         }
     }
 }

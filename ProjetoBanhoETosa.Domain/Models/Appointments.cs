@@ -22,6 +22,8 @@ namespace ProjetoBanhoETosa.Domain.Models
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
+        [ForeignKey(nameof(Pet))]
+        public int? PetId { get; set; }
         [StringLength(100)]
         public string PetName { get; set; }
         [StringLength(100)]
@@ -41,11 +43,12 @@ namespace ProjetoBanhoETosa.Domain.Models
         public bool HasSubscription { get; set; }
         [ForeignKey(nameof(Subscription))]
         public int? SubscriptionId { get; set; }
-        public DateTime CreatedAt { get; set; } = DateTime.Now;
-        public DateTime? UpdatedAt { get; set; } = DateTime.Now;
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime? UpdatedAt { get; set; } = DateTime.UtcNow;
 
         public Service Service { get; set; }
         public Subscription Subscriptions { get; set; }
+        public Pet? Pet { get; set; }
 
     }
 }

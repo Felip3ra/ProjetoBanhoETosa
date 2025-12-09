@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using ProjetoBanhoETosa.Infrastructure.Context;
@@ -11,9 +12,11 @@ using ProjetoBanhoETosa.Infrastructure.Context;
 namespace ProjetoBanhoETosa.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251130011942_AjusteTimestampGlobal")]
+    partial class AjusteTimestampGlobal
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -55,9 +58,6 @@ namespace ProjetoBanhoETosa.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int?>("PetId")
-                        .HasColumnType("integer");
-
                     b.Property<string>("PetName")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -81,94 +81,11 @@ namespace ProjetoBanhoETosa.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("PetId");
-
                     b.HasIndex("ServiceId");
 
                     b.HasIndex("SubscriptionId");
 
                     b.ToTable("Appointments");
-                });
-
-            modelBuilder.Entity("ProjetoBanhoETosa.Domain.Models.Client", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Email")
-                        .HasColumnType("text");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(120)
-                        .HasColumnType("character varying(120)");
-
-                    b.Property<string>("Phone")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("created_at")
-                        .HasColumnType("timestamp without time zone");
-
-                    b.Property<DateTime?>("updated_at")
-                        .HasColumnType("timestamp without time zone");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Clients");
-                });
-
-            modelBuilder.Entity("ProjetoBanhoETosa.Domain.Models.Pet", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<int?>("Age")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("Breed")
-                        .HasMaxLength(120)
-                        .HasColumnType("character varying(120)");
-
-                    b.Property<int>("ClientId")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(120)
-                        .HasColumnType("character varying(120)");
-
-                    b.Property<string>("Notes")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)");
-
-                    b.Property<int?>("PlanId")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("Species")
-                        .IsRequired()
-                        .HasMaxLength(60)
-                        .HasColumnType("character varying(60)");
-
-                    b.Property<DateTime>("created_at")
-                        .HasColumnType("timestamp without time zone");
-
-                    b.Property<DateTime?>("updated_at")
-                        .HasColumnType("timestamp without time zone");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ClientId");
-
-                    b.HasIndex("PlanId");
-
-                    b.ToTable("Pets");
                 });
 
             modelBuilder.Entity("ProjetoBanhoETosa.Domain.Models.Plan", b =>
@@ -325,10 +242,6 @@ namespace ProjetoBanhoETosa.Infrastructure.Migrations
 
             modelBuilder.Entity("ProjetoBanhoETosa.Domain.Models.Appointment", b =>
                 {
-                    b.HasOne("ProjetoBanhoETosa.Domain.Models.Pet", "Pet")
-                        .WithMany()
-                        .HasForeignKey("PetId");
-
                     b.HasOne("ProjetoBanhoETosa.Domain.Models.Service", "Service")
                         .WithMany()
                         .HasForeignKey("ServiceId")
@@ -339,33 +252,9 @@ namespace ProjetoBanhoETosa.Infrastructure.Migrations
                         .WithMany()
                         .HasForeignKey("SubscriptionId");
 
-                    b.Navigation("Pet");
-
                     b.Navigation("Service");
 
                     b.Navigation("Subscriptions");
-                });
-
-            modelBuilder.Entity("ProjetoBanhoETosa.Domain.Models.Pet", b =>
-                {
-                    b.HasOne("ProjetoBanhoETosa.Domain.Models.Client", "Client")
-                        .WithMany("Pets")
-                        .HasForeignKey("ClientId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("ProjetoBanhoETosa.Domain.Models.Plan", "Plan")
-                        .WithMany()
-                        .HasForeignKey("PlanId");
-
-                    b.Navigation("Client");
-
-                    b.Navigation("Plan");
-                });
-
-            modelBuilder.Entity("ProjetoBanhoETosa.Domain.Models.Client", b =>
-                {
-                    b.Navigation("Pets");
                 });
 #pragma warning restore 612, 618
         }

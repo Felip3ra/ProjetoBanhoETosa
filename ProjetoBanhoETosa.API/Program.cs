@@ -1,7 +1,15 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi.Models;
+using ProjetoBanhoETosa.Application;
+using ProjetoBanhoETosa.Domain.Repository;
 using ProjetoBanhoETosa.Infrastructure.Context;
+using ProjetoBanhoETosa.Infrastructure.Mappings;
+using ProjetoBanhoETosa.Infrastructure.Repository;
+// Permitir DateTime Kind Local/Unspecified para timestamp with time zone (compatibilidade)
+AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+AppContext.SetSwitch("Npgsql.DisableDateTimeInfinityConversions", true);
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -33,6 +41,14 @@ builder.Services.AddCors(options =>
               .AllowAnyMethod();
     });
 });
+
+builder.Services.AddScoped(typeof(IRepository<>),typeof(Repository<>));
+builder.Services.AddAutoMapper(cfg => { }, AppDomain.CurrentDomain.GetAssemblies());
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped(typeof(IService<,>), typeof(Service<,>));
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IClientSummaryService, ClientSummaryService>();
+builder.Services.AddScoped<IClientAppService, ClientAppService>();
 
 var app = builder.Build();
 app.UseCors("AllowAll");

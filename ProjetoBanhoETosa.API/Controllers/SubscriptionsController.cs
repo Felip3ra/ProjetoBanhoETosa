@@ -1,71 +1,85 @@
-﻿using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using ProjetoBanhoETosa.Application;
+using ProjetoBanhoETosa.Application.DTO;
 using ProjetoBanhoETosa.Domain.Models;
-using ProjetoBanhoETosa.Infrastructure.Context;
 
 namespace ProjetoBanhoETosa.Presentation.Controllers
 {
     [Route("api/[controller]")]
     public class SubscriptionsController : Controller
     {
-        private readonly AppDbContext _context;
-        public SubscriptionsController(AppDbContext context)
+        private readonly IService<SubscriptionDTO, Subscription> _subscriptionService;
+        
+        public SubscriptionsController(IService<SubscriptionDTO, Subscription> subscriptionService)
         {
-            _context = context;
+            _subscriptionService = subscriptionService;
         }
 
         [HttpGet("GetAllSubscriptions")]
-        public IActionResult GetAllSubscriptions()
+        public async Task<IActionResult> GetAllSubscriptions()
         {
-            List<Subscription> subscriptions = _context.Subscriptions.ToList();
-            if (subscriptions == null || subscriptions.Count == 0)
-            {
-                return NotFound(new { message = "Assinaturas Encontradas" });
-            }
-            return Ok(new { message = "Assinaturas Encontradas", subscription = subscriptions });
+            
+            var subscriptions = await _subscriptionService.GetAllAsync();
+            return Ok(new { message = "Assinaturas encontradas", subscription = subscriptions ?? Enumerable.Empty<SubscriptionDTO>() });
         }
         [HttpPut("ConfirmPayment")]
-        public IActionResult ConfirmPayment([FromBody] Subscription subscription)
+        public async Task<IActionResult> ConfirmPayment([FromBody] SubscriptionDTO subscription)
         {
             if (subscription == null)
             {
-                return BadRequest("Os Dados do formulário estão nulos");
+                return BadRequest(new { message = "Os dados do formulario estao nulos" });
             }
+            subscription.StartDate = DateTime.SpecifyKind(subscription.StartDate, DateTimeKind.Utc);
+            subscription.EndDate = DateTime.SpecifyKind(subscription.EndDate, DateTimeKind.Utc);
+            bool updated = await _subscriptionService.UpdateAsync(subscription);
+            if (!updated)
+                return StatusCode(500, new { message = "Erro ao atualizar a assinatura." });
 
-            _context.Entry(subscription).State = EntityState.Modified;
-            _context.SaveChanges();
-
-            return Ok(new { message = "Assinatura Atualizada", Subscription = subscription });
+            return Ok(new { message = "Assinatura atualizada", Subscription = subscription });
         }
         [HttpPost("CreateSubscription")]
-        public IActionResult CreateSubscription([FromBody] Subscription subscription)
+        public async Task<IActionResult> CreateSubscription([FromBody] SubscriptionDTO subscription)
         {
             if (subscription == null)
             {
-                return BadRequest("Os Dados do formulário estão nulos");
+                return BadRequest(new { message = "Os dados do formulario estao nulos" });
             }
-            _context.Subscriptions.Add(subscription);
-            _context.SaveChanges();
-
-            return CreatedAtAction(nameof(GetAllSubscriptions), new { id = subscription.Id }, new
+            subscription.StartDate = DateTime.SpecifyKind(subscription.StartDate, DateTimeKind.Utc);
+            subscription.EndDate = DateTime.SpecifyKind(subscription.EndDate, DateTimeKind.Utc);
+            try
             {
-                message = "Assinatura criada com sucesso!",
-                Subscription = subscription
-            });
+                bool added = await _subscriptionService.AddAsync(subscription);
+                if (!added)
+                    return StatusCode(500, new { message = "Erro ao criar a assinatura." });
+
+                var created = await _subscriptionService.GetByCondition(s =>
+                    s.CustomerName == subscription.CustomerName &&
+                    s.PlanName == subscription.PlanName &&
+                    s.StartDate == subscription.StartDate);
+
+                return CreatedAtAction(nameof(GetAllSubscriptions), new { id = created?.Id ?? subscription.Id }, new
+                {
+                    message = "Assinatura criada com sucesso!",
+                    Subscription = created ?? subscription
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = $"Erro ao criar a assinatura: {ex.Message}" });
+            }
         }
         [HttpDelete("DeleteSubscription")]
-        public IActionResult DeleteSubscription([FromBody] Subscription subscription)
+        public async Task<IActionResult> DeleteSubscription([FromBody] SubscriptionDTO subscription)
         {
             if (subscription == null)
             {
-                return BadRequest("Os Dados do formulário estão nulos");
+                return BadRequest(new { message = "Os dados do formulario estao nulos" });
             }
+            bool deleted = await _subscriptionService.DeleteAsync(subscription.Id);
+            if (!deleted)
+                return StatusCode(500, new { message = "Erro ao deletar a assinatura." });
 
-            _context.Entry(subscription).State = EntityState.Modified;
-            _context.SaveChanges();
-
-            return Ok(new { message = "Assinatura Atualizada", Subscription = subscription });
+            return Ok(new { message = "Assinatura atualizada", Subscription = subscription });
         }
     }
 }

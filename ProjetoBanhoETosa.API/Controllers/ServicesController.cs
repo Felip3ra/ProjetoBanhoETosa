@@ -1,47 +1,80 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Mvc;
+using ProjetoBanhoETosa.Application;
+using ProjetoBanhoETosa.Application.DTO;
 using ProjetoBanhoETosa.Domain.Models;
-using ProjetoBanhoETosa.Infrastructure.Context;
 
 namespace ProjetoBanhoETosa.Presentation.Controllers
 {
     [Route("api/[controller]")]
     public class ServicesController : Controller
     {
-        private readonly AppDbContext _context;
-        public ServicesController(AppDbContext context)
+        private readonly IService<ServiceDTO, Service> _serviceService;
+
+        public ServicesController(IService<ServiceDTO, Service> serviceService)
         {
-            _context = context;
+            _serviceService = serviceService;
         }
+
         [HttpGet("GetAllServices")]
-        public IActionResult GetAllServices() {
-            List<Service> services = _context.Services.ToList();
-            if (services == null || services.Count == 0)
-            {
-                return NotFound(new { message = "Servicos não Encontrados" });
-            }
-            return Ok(new { message = "Servicos Encontrados", Services = services });
+        public async Task<IActionResult> GetAllServices()
+        {
+            var services = await _serviceService.GetAllAsync();
+            var list = services?.ToList() ?? new List<ServiceDTO>();
+            return Ok(new { message = "Servicos encontrados", Services = list });
         }
 
         [HttpPut("UpdateService/{id}")]
-        public IActionResult UpdateService(int id, [FromBody] decimal newPrice)
+        public async Task<IActionResult> UpdateService(int id, [FromBody] decimal newPrice)
         {
             if (newPrice <= 0)
-                return BadRequest(new { message = "Preço inválido." });
+                return BadRequest(new { message = "Preco invalido." });
 
-            var newService = _context.Services.FirstOrDefault(s => s.Id == id);
-            if (newService == null)
-                return NotFound(new { message = "Serviço não encontrado." });
+            var existingService = await _serviceService.GetByIdAsync(id);
+            if (existingService == null)
+                return NotFound(new { message = "Servico nao encontrado." });
 
-            newService.Price = newPrice;
-            _context.Services.Update(newService);
-            _context.SaveChanges();
+            existingService.Price = newPrice;
+            var updated = await _serviceService.UpdateAsync(existingService);
+            if (!updated)
+                return StatusCode(500, new { message = "Erro ao atualizar o preco do servico." });
 
             return Ok(new
             {
-                message = "Preço atualizado com sucesso!",
-                service = newService
+                message = "Preco atualizado com sucesso!",
+                service = existingService
             });
+        }
+
+        [HttpPost("CreateService")]
+        public async Task<IActionResult> CreateService([FromBody] ServiceDTO service)
+        {
+            if (service == null || string.IsNullOrWhiteSpace(service.Name) || service.Price <= 0 || service.DurationInMinutes <= 0)
+                return BadRequest(new { message = "Dados do servico invalidos." });
+
+            var added = await _serviceService.AddAsync(service);
+            if (!added)
+                return StatusCode(500, new { message = "Erro ao cadastrar o servico." });
+
+            var created = await _serviceService.GetByCondition(s => s.Name == service.Name);
+
+            return CreatedAtAction(nameof(GetAllServices), new { id = created?.Id ?? service.Id }, new
+            {
+                message = "Servico cadastrado com sucesso!",
+                service = created ?? service
+            });
+        }
+
+        [HttpDelete("DeleteService/{id}")]
+        public async Task<IActionResult> DeleteService(int id)
+        {
+            if (id <= 0)
+                return BadRequest(new { message = "Id invalido." });
+
+            var deleted = await _serviceService.DeleteAsync(id);
+            if (!deleted)
+                return NotFound(new { message = "Servico nao encontrado." });
+
+            return NoContent();
         }
     }
 }

@@ -1,7 +1,7 @@
 ﻿using System.Text.Json.Serialization;
 using ProjetoBanhoETosa.Domain.Models;
 
-namespace ProjetoBanhoETosa.Presentation.DTO
+namespace ProjetoBanhoETosa.Application.DTO
 {
     public class AppointmentDTO
     {
@@ -41,5 +41,6 @@ namespace ProjetoBanhoETosa.Presentation.DTO
         public PaymentStatus PaymentStatus { get; set; } = PaymentStatus.Pendente;
         public bool HasSubscription { get; set; }
         public int? SubscriptionId { get; set; }
+        public int? PetId { get; set; }
     }
 }
