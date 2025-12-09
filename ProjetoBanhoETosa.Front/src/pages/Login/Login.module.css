@@ -1,11 +1,11 @@
 @import "tailwindcss";
 
 .Container{
-    @apply min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center p-4;
+    @apply min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 flex items-center justify-center p-6;
 }
 
 .Container-Background{
-    @apply bg-white rounded-2xl shadow-xl p-8 w-full max-w-md;
+    @apply bg-white rounded-2xl shadow-xl p-8 w-full max-w-md border border-slate-100 space-y-6;
 }
 
 .Container-Header-Icon{
@@ -19,22 +19,22 @@
     @apply w-12 h-12 text-white;
 }
 .Tittle{
-    @apply text-3xl text-gray-800 mb-2 text-center font-bold;
+    @apply text-3xl text-slate-900 mb-1 text-center font-bold tracking-tight;
 }
 .Subtittle{
-    @apply text-center text-gray-600 mb-8;
+    @apply text-center text-slate-600 mb-2;
 }
 .Tab-Buttons{
-    @apply flex gap-2 mb-6 border-b;
+    @apply flex gap-2 mb-2 border-b border-slate-200;
 }
 .Tab-Button{
-    @apply flex-1 pb-3 font-semibold transition-all;
+    @apply flex-1 pb-3 font-semibold transition-all text-sm tracking-wide;
 }
 .Tab-Button-Active{
     @apply text-blue-600 border-b-2 border-blue-600;
 }
 .Tab-Button-Inactive{
-    @apply text-gray-500 hover:text-gray-700;
+    @apply text-slate-500 hover:text-slate-700;
 }
 .Label-Input{
     @apply block text-gray-700 mb-2 font-medium text-sm;
@@ -43,16 +43,16 @@
     @apply w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent;
 }
 .Button-Login{
-    @apply w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors;
+    @apply w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors shadow-sm;
 }
 .Button-Register{
-    @apply w-full bg-white text-blue-600 py-3 rounded-lg font-semibold border-2 border-blue-600 hover:bg-blue-50 transition-colors flex items-center justify-center gap-2;
+    @apply w-full bg-white text-blue-600 py-3 rounded-lg font-semibold border-2 border-blue-600 hover:bg-blue-50 transition-colors flex items-center justify-center gap-2 shadow-sm;
 }
 .Icon-Plus{
     @apply w-5 h-5;
 }
 .Button-Create-Account{
-    @apply w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors;
+    @apply w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors shadow-sm;
 }
 .Container-Account-Exists{
     @apply mt-4 text-center text-gray-600;

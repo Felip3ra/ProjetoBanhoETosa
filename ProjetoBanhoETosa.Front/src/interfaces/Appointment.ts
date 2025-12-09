@@ -1,5 +1,7 @@
 export interface Appointment {
   id: number;
+  clientId?: number;
+  subscriptionId?: number;
   petName: string;
   owner: string;
   service: string;
@@ -24,6 +26,10 @@ export interface AddAppointmentModalProps {
   newAppointment: Appointment;
   setNewAppointment: (value: Appointment) => void;
   handleServiceChange: (service: string) => void;
+  clients?: import("../services/clientService").Client[];
+  onSelectClient?: (clientId?: number) => void;
+  selectedClientId?: number;
+  autoFilledByPlan?: boolean;
 }
 
 export interface AmountMonthServicesProps{

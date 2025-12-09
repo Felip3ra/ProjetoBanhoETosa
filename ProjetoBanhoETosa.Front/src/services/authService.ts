@@ -1,6 +1,7 @@
 import type { UserDTO } from "../interfaces/User";
 
-const API_BASE_URL = "http://localhost:5159";
+// Backend UsersController está exposto em /api/Users
+const API_BASE_URL = "/api/Users";
 
 export const authService = {
   login: async (user: UserDTO): Promise<any> => {
@@ -10,8 +11,8 @@ export const authService = {
       body: JSON.stringify(user),
     });
     if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.message);
+      const error = await response.json().catch(() => ({}));
+      throw new Error(error.message || "Erro ao fazer login");
     }
     return response.json();
   },
@@ -23,8 +24,8 @@ export const authService = {
       body: JSON.stringify(user),
     });
     if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message);
+        const error = await response.json().catch(() => ({}));
+        throw new Error(error.message || "Erro ao registrar");
     }
     return response.json();
   },

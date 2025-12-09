@@ -1,6 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom";
 import type { AddAppointmentModalProps } from "../../../interfaces/Appointment";
+import type { Client } from "../../../services/clientService";
 import styles from "./AddAppointmentModal.module.css";
 
 const AddAppointmentModal: React.FC<AddAppointmentModalProps> = ({
@@ -10,6 +11,10 @@ const AddAppointmentModal: React.FC<AddAppointmentModalProps> = ({
   newAppointment,
   setNewAppointment,
   handleServiceChange,
+  clients = [],
+  onSelectClient,
+  selectedClientId,
+  autoFilledByPlan,
 }) => {
   if (!show) return null;
 
@@ -19,6 +24,26 @@ const AddAppointmentModal: React.FC<AddAppointmentModalProps> = ({
       <div className={styles['Container-Modal']}>
         <h3 className={styles['Container-Modal-Tittle']}>Novo Agendamento</h3>
         <div className="space-y-4">
+          <div>
+            <label className={styles.Label}>Cliente (opcional)</label>
+            <select
+              className={styles.Input}
+              value={selectedClientId ?? ""}
+              onChange={(e) => {
+                const id = e.target.value ? Number(e.target.value) : undefined;
+                onSelectClient?.(id);
+              }}
+            >
+              <option value="">Sem cliente cadastrado</option>
+              {clients.map((c: Client) => (
+                <option key={c.id} value={c.id}>
+                  {c.name} {c.activePlanName ? `- ${c.activePlanName}` : ""}
+                </option>
+              ))}
+            </select>
+            <p className="text-xs text-gray-500 mt-1">Selecionar cliente preenche dono/telefone/pet. Se tiver plano ativo, ajusta pagamento.</p>
+          </div>
+
           <div>
             <label className={styles.Label}>Nome do Pet</label>
             <input
@@ -66,17 +91,19 @@ const AddAppointmentModal: React.FC<AddAppointmentModalProps> = ({
           <div>
             <label className={styles.Label}>Forma de Pagamento</label>
             <select
-              value={newAppointment.service}
-              onChange={(e) => handleServiceChange(e.target.value)}
+              value={newAppointment.paymentMethod}
+              onChange={(e) => setNewAppointment({ ...newAppointment, paymentMethod: e.target.value })}
               className={styles.Input}
             >
-              <option>PIX</option>
-              <option>Dinheiro</option>
-              <option>Cartão de Débito</option>
-              <option>Cartão de Crédito</option>
-              <option>Plano Mensal</option>
-
+              <option value="PIX">PIX</option>
+              <option value="Dinheiro">Dinheiro</option>
+              <option value="Cartão de Débito">Cartão de Débito</option>
+              <option value="Cartão de Crédito">Cartão de Crédito</option>
+              <option value="Plano Mensal">Plano Mensal</option>
             </select>
+            {autoFilledByPlan && (
+              <p className="text-xs text-purple-600 mt-1">Pagamento via plano ativo do cliente.</p>
+            )}
           </div>
 
           <div>
@@ -89,10 +116,10 @@ const AddAppointmentModal: React.FC<AddAppointmentModalProps> = ({
                     onChange={(e) => setNewAppointment({ ...newAppointment, price: parseFloat(e.target.value) || 0 })}
                     className={styles.Input}
                     step="0.01"
-                    disabled={newAppointment.paymentMethod === 'plano'}
+                    disabled={newAppointment.paymentMethod === "Plano Mensal"}
                   />
                 </div>
-                {newAppointment.paymentMethod === 'plano' && (
+                {newAppointment.paymentMethod === "Plano Mensal" && (
                   <p className="text-xs text-purple-600 mt-1">Valor coberto pelo plano mensal</p>
                 )}
               </div>

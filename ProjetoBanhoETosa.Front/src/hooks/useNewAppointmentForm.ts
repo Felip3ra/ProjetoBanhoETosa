@@ -18,6 +18,8 @@ interface UseNewAppointmentForm {
 export const useNewAppointmentForm = (services: Service[], initialDate: string): UseNewAppointmentForm => {
   const [newAppointment, setNewAppointment] = useState<Appointment>({
     id: 0,
+    clientId: undefined,
+    subscriptionId: undefined,
     petName: "",
     owner: "",
     service: "Banho e Tosa",
@@ -37,6 +39,8 @@ export const useNewAppointmentForm = (services: Service[], initialDate: string):
   const resetForm = useCallback(() => {
     setNewAppointment({
       id: 0,
+      clientId: undefined,
+      subscriptionId: undefined,
       petName: "",
       owner: "",
       service: "Banho e Tosa",

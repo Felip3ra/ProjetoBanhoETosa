@@ -1,5 +1,6 @@
 import TextInput from "../../Components/TextInput/TextInput";
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Dog, Plus } from "lucide-react";
 import styles from "./Login.module.css";
 import { motion } from "framer-motion";
@@ -8,6 +9,7 @@ import type { UserDTO } from "../../interfaces/User";
 
 export default function Login() {
   const { loading, error, login, register } = useAuth();
+  const navigate = useNavigate();
   const [loginForm, setLoginForm] = useState<UserDTO>({ email: '', password: '' });
   const [registerForm, setRegisterForm] = useState<UserDTO>({
     name: '',
@@ -21,7 +23,7 @@ export default function Login() {
     const success = await login(loginForm);
     if (success) {
       setLoginForm({ email: '', password: '' });
-      // Redirect or perform other actions after successful login
+      navigate("/Home");
     }
   };
 

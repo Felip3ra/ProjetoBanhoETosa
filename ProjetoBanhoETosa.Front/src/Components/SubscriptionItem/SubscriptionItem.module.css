@@ -31,7 +31,7 @@
     @apply bg-yellow-100 text-yellow-700;
 }
 .Container-Subscriptions{
-    @apply grid grid-cols-2 gap-3 text-sm mb-3;
+    @apply grid grid-cols-2 md:grid-cols-3 gap-3 text-sm mb-3;
 }
 .Container-Subscriptions-Label{
     @apply text-gray-600;
@@ -46,5 +46,5 @@
     @apply w-4 h-4;
 }
 .Button-Confirm{
-    @apply w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-semibold;
+    @apply w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-semibold disabled:opacity-60 disabled:cursor-not-allowed;
 }

@@ -5,7 +5,7 @@ interface Service {
   durationInMinutes: number;
 }
 
-const API_BASE_URL = "http://localhost:5159/api";
+const API_BASE_URL = "/api";
 
 export const serviceService = {
   getAllServices: async (): Promise<Service[]> => {
@@ -15,10 +15,10 @@ export const serviceService = {
         throw new Error("Erro ao carregar serviços");
       }
       const data = await response.json();
-      return data.services || [];
+      return data.Services || data.services || [];
     } catch (error) {
       console.error("Error fetching services:", error);
-      return []; // Explicitly return an empty array on error
+      return [];
     }
   },
 
@@ -31,7 +31,33 @@ export const serviceService = {
     if (!response.ok) {
       throw new Error("Erro ao atualizar serviço");
     }
-    const data = await response.json();
-    alert(data.message); // Assuming backend sends a message for success
+    try {
+      const data = await response.json();
+      if (data?.message) alert(data.message);
+    } catch {
+      // resposta sem corpo
+    }
+  },
+
+  createService: async (service: Omit<Service, "id">): Promise<Service> => {
+    const response = await fetch(`${API_BASE_URL}/Services/CreateService`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(service),
+    });
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      throw new Error(error.message || "Erro ao cadastrar serviço");
+    }
+    return response.json();
+  },
+
+  deleteService: async (serviceId: number): Promise<void> => {
+    const response = await fetch(`${API_BASE_URL}/Services/DeleteService/${serviceId}`, {
+      method: "DELETE",
+    });
+    if (!response.ok && response.status !== 204) {
+      throw new Error("Erro ao deletar serviço");
+    }
   },
 };

@@ -1,8 +1,8 @@
-import { Dog, User, LogOut,Edit2,CreditCard } from "lucide-react";
+import { Dog, User, LogOut, Edit2, CreditCard, UserPlus } from "lucide-react";
 import { useState } from "react";
 import styles from "./Header.module.css";
 import type { HeaderProps } from "../../interfaces/Header";
-export default function Header({onEditPrices,onShowPlans} : HeaderProps) {
+export default function Header({onEditPrices,onShowPlans, onShowClients, userName = "Cliente", onLogout} : HeaderProps) {
      
 
 const [subscriptions, setSubscriptions] = useState([
@@ -45,10 +45,17 @@ const [subscriptions, setSubscriptions] = useState([
                 </span>
               )}
             </button>
+            <button
+              onClick={onShowClients}
+              className={styles['btn-Clients']}
+            >
+              <UserPlus className={styles['btn-Show-Plans-icon']} />
+              <span>Clientes</span>
+            </button>
                     <User className={styles['Icon-User']} />
-                    <span className="font-medium">Juliana</span>
+                    <span className="font-medium">{userName}</span>
                     <button
-
+                    onClick={onLogout}
                     className={styles['btn-logout']}
                 >
                     <LogOut className={styles['Icon-logout']} />

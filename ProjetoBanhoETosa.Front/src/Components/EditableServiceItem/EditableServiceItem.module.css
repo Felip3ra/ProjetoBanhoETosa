@@ -36,6 +36,15 @@
 .Icon-Edit, .Icon-Check {
     @apply w-4 h-4;
 }
+.Container-Actions {
+    @apply flex items-center gap-2;
+}
+.Button-Delete {
+    @apply flex items-center gap-1 px-3 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors text-sm;
+}
+.Icon-Delete {
+    @apply w-4 h-4;
+}
 .Button-Cancel {
     @apply px-3 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-sm;
 }

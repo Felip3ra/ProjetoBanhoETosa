@@ -1,24 +1,18 @@
 import { useState, useEffect, useCallback } from "react";
-import { subscriptionService } from "../services/subscriptionService"; // Import the new service
-
-interface Subscription {
-  id: number;
-  customerName: string;
-  planName: string;
-  startDate: string;
-  endDate: string;
-  paymentStatus: string;
-  servicesUsed: number;
-  servicesAvailable: number;
-  price: number;
-}
+import {
+  subscriptionService,
+  type Subscription,
+  type SubscriptionPayload,
+} from "../services/subscriptionService";
 
 interface UseSubscriptions {
   subscriptions: Subscription[];
   loading: boolean;
   isConfirmingPayment: boolean;
+  isCreating: boolean;
   error: string | null;
-  confirmSubscriptionPayment: (subscriptionId: number) => Promise<boolean>;
+  createSubscription: (subscription: SubscriptionPayload) => Promise<boolean>;
+  confirmSubscriptionPayment: (subscription: Subscription) => Promise<boolean>;
   refetchSubscriptions: () => Promise<void>;
 }
 
@@ -26,6 +20,7 @@ export const useSubscriptions = (): UseSubscriptions => {
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [isConfirmingPayment, setIsConfirmingPayment] = useState<boolean>(false);
+  const [isCreating, setIsCreating] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
   const fetchSubscriptions = useCallback(async () => {
@@ -46,14 +41,36 @@ export const useSubscriptions = (): UseSubscriptions => {
     fetchSubscriptions();
   }, [fetchSubscriptions]);
 
-  const confirmSubscriptionPayment = useCallback(async (subscriptionId: number): Promise<boolean> => {
+  const createSubscription = useCallback(
+    async (subscription: SubscriptionPayload): Promise<boolean> => {
+      setIsCreating(true);
+      setError(null);
+      try {
+        await subscriptionService.createSubscription({
+          servicesUsed: 0,
+          ...subscription,
+        });
+        await fetchSubscriptions();
+        return true;
+      } catch (err: any) {
+        console.error("Failed to create subscription:", err);
+        setError(err.message || "Erro ao criar assinatura!");
+        return false;
+      } finally {
+        setIsCreating(false);
+      }
+    },
+    [fetchSubscriptions]
+  );
+
+  const confirmSubscriptionPayment = useCallback(async (subscription: Subscription): Promise<boolean> => {
     setIsConfirmingPayment(true);
     setError(null);
     try {
-      await subscriptionService.confirmSubscriptionPayment(subscriptionId);
+      await subscriptionService.confirmSubscriptionPayment({ ...subscription, paymentStatus: "pago" });
       setSubscriptions((prev) =>
         prev.map((s) =>
-          s.id === subscriptionId ? { ...s, paymentStatus: "pago" } : s
+          s.id === subscription.id ? { ...s, paymentStatus: "pago" } : s
         )
       );
       await fetchSubscriptions();
@@ -67,5 +84,14 @@ export const useSubscriptions = (): UseSubscriptions => {
     }
   }, [fetchSubscriptions]);
 
-  return { subscriptions, loading, isConfirmingPayment, error, confirmSubscriptionPayment, refetchSubscriptions: fetchSubscriptions };
+  return {
+    subscriptions,
+    loading,
+    isConfirmingPayment,
+    isCreating,
+    error,
+    createSubscription,
+    confirmSubscriptionPayment,
+    refetchSubscriptions: fetchSubscriptions
+  };
 };

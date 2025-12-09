@@ -1,6 +1,8 @@
-interface Subscription {
+export interface Subscription {
   id: number;
   customerName: string;
+  phone: string;
+  email?: string;
   planName: string;
   startDate: string;
   endDate: string;
@@ -8,9 +10,12 @@ interface Subscription {
   servicesUsed: number;
   servicesAvailable: number;
   price: number;
+  paymentMethod: string;
 }
 
-const API_BASE_URL = "http://localhost:5159/api";
+export type SubscriptionPayload = Omit<Subscription, "id">;
+
+const API_BASE_URL = "/api";
 
 export const subscriptionService = {
   getAllSubscriptions: async (): Promise<Subscription[]> => {
@@ -20,22 +25,50 @@ export const subscriptionService = {
         throw new Error("Erro ao carregar assinaturas");
       }
       const data = await response.json();
-      return data.subscription || [];
+      const list = data.subscription || data.subscriptions || data || [];
+      if (!Array.isArray(list)) return [];
+      return list.map((sub: any) => ({
+        paymentMethod: sub.paymentMethod ?? "PIX",
+        servicesUsed: sub.servicesUsed ?? 0,
+        ...sub,
+      }));
     } catch (error) {
       console.error("Error fetching subscriptions:", error);
       return []; // Explicitly return an empty array on error
     }
   },
 
-  confirmSubscriptionPayment: async (subscriptionId: number): Promise<void> => {
+  createSubscription: async (subscription: SubscriptionPayload): Promise<Subscription> => {
+    const response = await fetch(`${API_BASE_URL}/Subscriptions/CreateSubscription`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(subscription),
+    });
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({}));
+      throw new Error(err?.message || "Erro ao criar assinatura");
+    }
+    const data = await response.json().catch(() => ({}));
+    return data.Subscription || data.subscription || data;
+  },
+
+  confirmSubscriptionPayment: async (subscription: Subscription): Promise<void> => {
     const response = await fetch(
-      `${API_BASE_URL}/Subscriptions/ConfirmPayment/${subscriptionId}`,
-      { method: "PUT" }
+      `${API_BASE_URL}/Subscriptions/ConfirmPayment`,
+      {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(subscription),
+      }
     );
     if (!response.ok) {
       throw new Error("Erro ao confirmar pagamento");
     }
-    const data = await response.json();
-    alert(data.message); // Assuming backend sends a message for success
+    try {
+      const data = await response.json();
+      if (data?.message) alert(data.message);
+    } catch (_) {
+      // Sem corpo: seguir silenciosamente
+    }
   },
 };

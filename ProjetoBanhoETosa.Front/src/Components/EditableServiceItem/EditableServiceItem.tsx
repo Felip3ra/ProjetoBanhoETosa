@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Edit2, Check } from "lucide-react";
+import { Edit2, Check, Trash2 } from "lucide-react";
 import styles from "./EditableServiceItem.module.css";
 
 interface Service {
@@ -12,15 +12,17 @@ interface Service {
 interface EditableServiceItemProps {
   service: Service;
   onSaveItem: (serviceId: number, newPrice: number) => void;
+  onDelete?: (serviceId: number) => void;
 }
 
-export default function EditableServiceItem({ service, onSaveItem }: EditableServiceItemProps) {
+export default function EditableServiceItem({ service, onSaveItem, onDelete }: EditableServiceItemProps) {
+  const safePrice = typeof service?.price === "number" && !Number.isNaN(service.price) ? service.price : 0;
   const [isEditing, setIsEditing] = useState<boolean>(false);
-  const [tempPrice, setTempPrice] = useState<string>(service.price.toString());
+  const [tempPrice, setTempPrice] = useState<string>(safePrice.toString());
 
   const startEdit = () => {
     setIsEditing(true);
-    setTempPrice(service.price.toString());
+    setTempPrice(safePrice.toString());
   };
 
   const handleSave = () => {
@@ -41,7 +43,7 @@ export default function EditableServiceItem({ service, onSaveItem }: EditableSer
 
   const handleCancel = () => {
     setIsEditing(false);
-    setTempPrice(service.price.toString());
+    setTempPrice(safePrice.toString());
   };
 
   return (
@@ -79,15 +81,27 @@ export default function EditableServiceItem({ service, onSaveItem }: EditableSer
           </div>
         ) : (
           <div className={styles["Container-Button-Edit"]}>
-            <span className={styles["Label-Price"]}>R$ {service.price.toFixed(2)}</span>
-            <button
-              onClick={startEdit}
-              className={styles["Button-Edit"]}
-              aria-label={`Editar preço de ${service.name}`}
-            >
-              <Edit2 className={styles["Icon-Edit"]} />
-              Editar
-            </button>
+            <span className={styles["Label-Price"]}>R$ {safePrice.toFixed(2)}</span>
+            <div className={styles["Container-Actions"]}>
+              <button
+                onClick={startEdit}
+                className={styles["Button-Edit"]}
+                aria-label={`Editar preço de ${service.name}`}
+              >
+                <Edit2 className={styles["Icon-Edit"]} />
+                Editar
+              </button>
+              {onDelete && (
+                <button
+                  onClick={() => onDelete(service.id)}
+                  className={styles["Button-Delete"]}
+                  aria-label={`Excluir ${service.name}`}
+                >
+                  <Trash2 className={styles["Icon-Delete"]} />
+                  Excluir
+                </button>
+              )}
+            </div>
           </div>
         )}
       </div>

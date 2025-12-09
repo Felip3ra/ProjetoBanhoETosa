@@ -20,7 +20,7 @@
     @apply text-2xl font-bold text-gray-800;
 }
 .Container-Button{
-    @apply flex gap-2 items-center;
+    @apply flex gap-3 items-center;
 }
 .btn-Edit-Prices{
     @apply flex items-center gap-2 px-3 py-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors text-sm;
@@ -29,7 +29,10 @@
     @apply w-4 h-4;
 }
 .btn-Show-Plans{
-    @apply flex items-center gap-2 px-3 py-2 text-purple-600 hover:bg-purple-50 rounded-lg transition-colors relative text-sm;
+    @apply flex items-center gap-2 px-3 py-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors relative text-sm;
+}
+.btn-Clients{
+    @apply flex items-center gap-2 px-3 py-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors text-sm;
 }
 .btn-logout{
     @apply flex items-center gap-2 px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors;

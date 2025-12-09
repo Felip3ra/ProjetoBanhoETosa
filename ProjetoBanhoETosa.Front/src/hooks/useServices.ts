@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { serviceService } from "../services/serviceService"; // Import the new service
+import { serviceService } from "../services/serviceService";
 
 interface Service {
   id: number;
@@ -14,6 +14,8 @@ interface UseServices {
   isUpdating: boolean;
   error: string | null;
   updateServicePrice: (serviceId: number, newPrice: number) => Promise<boolean>;
+  addService: (service: Omit<Service, "id">) => Promise<boolean>;
+  deleteService: (serviceId: number) => Promise<boolean>;
   refetchServices: () => Promise<void>;
 }
 
@@ -28,7 +30,10 @@ export const useServices = (): UseServices => {
     setError(null);
     try {
       const fetchedServices = await serviceService.getAllServices();
-      setServices(fetchedServices);
+      const unique = Array.from(
+        new Map(fetchedServices.map((s) => [s.id, s])).values()
+      );
+      setServices(unique);
     } catch (err: any) {
       console.error("Failed to fetch services:", err);
       setError(err.message || "Erro ao carregar serviços do servidor!");
@@ -63,5 +68,48 @@ export const useServices = (): UseServices => {
     }
   }, [fetchServices]);
 
-  return { services, loading, isUpdating, error, updateServicePrice, refetchServices: fetchServices };
+  const addService = useCallback(async (service: Omit<Service, "id">): Promise<boolean> => {
+    if (!service.name || service.price <= 0 || service.durationInMinutes <= 0) {
+      alert("Preencha nome, preço e duração válidos.");
+      return false;
+    }
+
+    setIsUpdating(true);
+    setError(null);
+    try {
+      const created = await serviceService.createService(service);
+      setServices((prev) => {
+        const next = new Map(prev.map((s) => [s.id, s]));
+        next.set(created.id, created);
+        return Array.from(next.values());
+      });
+      await fetchServices();
+      return true;
+    } catch (err: any) {
+      console.error("Failed to create service:", err);
+      setError(err.message || "Erro ao criar serviço!");
+      return false;
+    } finally {
+      setIsUpdating(false);
+    }
+  }, [fetchServices]);
+
+  const deleteService = useCallback(async (serviceId: number): Promise<boolean> => {
+    if (!serviceId) return false;
+    setIsUpdating(true);
+    setError(null);
+    try {
+      await serviceService.deleteService(serviceId);
+      setServices((prev) => prev.filter((s) => s.id !== serviceId));
+      return true;
+    } catch (err: any) {
+      console.error("Failed to delete service:", err);
+      setError(err.message || "Erro ao deletar serviço!");
+      return false;
+    } finally {
+      setIsUpdating(false);
+    }
+  }, []);
+
+  return { services, loading, isUpdating, error, updateServicePrice, addService, deleteService, refetchServices: fetchServices };
 };
