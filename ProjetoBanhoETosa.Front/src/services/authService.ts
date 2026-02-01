@@ -1,4 +1,4 @@
-import type { UserDTO } from "../interfaces/User";
+﻿import type { UserDTO } from "../interfaces/User";
 
 // Backend UsersController está exposto em /api/Users
 const API_BASE_URL = "/api/Users";
@@ -24,8 +24,8 @@ export const authService = {
       body: JSON.stringify(user),
     });
     if (!response.ok) {
-        const error = await response.json().catch(() => ({}));
-        throw new Error(error.message || "Erro ao registrar");
+      const error = await response.json().catch(() => ({}));
+      throw new Error(error.message || "Erro ao registrar");
     }
     return response.json();
   },

@@ -1,4 +1,4 @@
-interface Service {
+﻿interface Service {
   id: number;
   name: string;
   price: number;
@@ -12,7 +12,8 @@ export const serviceService = {
     try {
       const response = await fetch(`${API_BASE_URL}/Services/GetAllServices`);
       if (!response.ok) {
-        throw new Error("Erro ao carregar serviços");
+        const error = await response.json().catch(() => ({}));
+        throw new Error(error.details ? `${error.message} (${error.details})` : error.message || "Erro ao carregar serviços");
       }
       const data = await response.json();
       return data.Services || data.services || [];
@@ -29,13 +30,8 @@ export const serviceService = {
       body: JSON.stringify(newPrice),
     });
     if (!response.ok) {
-      throw new Error("Erro ao atualizar serviço");
-    }
-    try {
-      const data = await response.json();
-      if (data?.message) alert(data.message);
-    } catch {
-      // resposta sem corpo
+      const error = await response.json().catch(() => ({}));
+      throw new Error(error.details ? `${error.message} (${error.details})` : error.message || "Erro ao atualizar serviço");
     }
   },
 
@@ -47,7 +43,7 @@ export const serviceService = {
     });
     if (!response.ok) {
       const error = await response.json().catch(() => ({}));
-      throw new Error(error.message || "Erro ao cadastrar serviço");
+      throw new Error(error.details ? `${error.message} (${error.details})` : error.message || "Erro ao cadastrar serviço");
     }
     return response.json();
   },
@@ -57,7 +53,8 @@ export const serviceService = {
       method: "DELETE",
     });
     if (!response.ok && response.status !== 204) {
-      throw new Error("Erro ao deletar serviço");
+      const error = await response.json().catch(() => ({}));
+      throw new Error(error.details ? `${error.message} (${error.details})` : error.message || "Erro ao deletar serviço");
     }
   },
 };

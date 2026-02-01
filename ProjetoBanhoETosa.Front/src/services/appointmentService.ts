@@ -1,4 +1,4 @@
-import type { Appointment } from "../interfaces/Appointment";
+﻿import type { Appointment } from "../interfaces/Appointment";
 
 const API_BASE_URL = "/api";
 
@@ -8,10 +8,11 @@ export const appointmentService = {
       const response = await fetch(`${API_BASE_URL}/Appointments/GetAllAppointments`);
       if (!response.ok) {
         if (response.status === 404) {
-          // API devolve 404 quando nao ha registros
+          // API devolve 404 quando não há registros
           return [];
         }
-        throw new Error("Erro ao carregar agendamentos");
+        const error = await response.json().catch(() => ({}));
+        throw new Error(error.details || error.message || "Erro ao carregar agendamentos");
       }
       const data = await response.json();
       const raw = data.appointments || data.Appointments || [];
@@ -24,7 +25,12 @@ export const appointmentService = {
                 ? parsedDate.toISOString().slice(0, 10)
                 : "";
             const timeRaw =
-              a.time || a.Time || a.appointmentTime || a.AppointmentTime || a.appointmentTimeString || a.AppointmentTimeString;
+              a.time ||
+              a.Time ||
+              a.appointmentTime ||
+              a.AppointmentTime ||
+              a.appointmentTimeString ||
+              a.AppointmentTimeString;
             const time = typeof timeRaw === "string" ? timeRaw.slice(0, 5) : "";
 
             return {
@@ -49,7 +55,7 @@ export const appointmentService = {
         : [];
     } catch (error) {
       console.error("Error fetching appointments:", error);
-      return []; // Explicitly return an empty array on error
+      return [];
     }
   },
 
@@ -60,10 +66,10 @@ export const appointmentService = {
       body: JSON.stringify(newAppointmentData),
     });
     if (!response.ok) {
-      throw new Error("Erro ao adicionar agendamento");
+      const error = await response.json().catch(() => ({}));
+      throw new Error(error.details || error.message || "Erro ao adicionar agendamento");
     }
-    const data = await response.json();
-    alert(data.message); // Assuming backend sends a message for success
+    const data = await response.json().catch(() => ({}));
     const a = data.appointment || data.Appointment || {};
     const isoDate = a.date || a.Date || a.AppointmentDate || a.appointmentDate || newAppointmentData.date;
     const parsedDate = isoDate ? new Date(isoDate) : null;
@@ -72,7 +78,13 @@ export const appointmentService = {
         ? parsedDate.toISOString().slice(0, 10)
         : newAppointmentData.date;
     const timeRaw =
-      a.time || a.Time || a.appointmentTime || a.AppointmentTime || a.appointmentTimeString || a.AppointmentTimeString || newAppointmentData.time;
+      a.time ||
+      a.Time ||
+      a.appointmentTime ||
+      a.AppointmentTime ||
+      a.appointmentTimeString ||
+      a.AppointmentTimeString ||
+      newAppointmentData.time;
     const time = typeof timeRaw === "string" ? timeRaw.slice(0, 5) : newAppointmentData.time;
 
     return {
@@ -100,15 +112,13 @@ export const appointmentService = {
     const response = await fetch(`${API_BASE_URL}/Appointments/DeleteAppointment/${id}`, {
       method: "DELETE",
     });
-    if (!response.ok && response.status !== 204) {
-      throw new Error("Erro ao excluir agendamento");
+    if (response.status === 404) {
+      // Já removido no servidor ou id inexistente
+      return;
     }
-    // Algumas respostas DELETE podem vir sem corpo (204)
-    try {
-      const data = await response.json();
-      if (data?.message) alert(data.message);
-    } catch (_) {
-      // Sem corpo ou JSON inválido: apenas silencie
+    if (!response.ok && response.status !== 204) {
+      const error = await response.json().catch(() => ({}));
+      throw new Error(error.message || "Erro ao excluir agendamento");
     }
   },
 };

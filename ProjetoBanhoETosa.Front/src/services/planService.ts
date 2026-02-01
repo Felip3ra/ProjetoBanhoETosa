@@ -1,4 +1,4 @@
-export interface Plan {
+﻿export interface Plan {
   id?: number;
   name: string;
   description?: string | null;
@@ -30,7 +30,8 @@ export const planService = {
       body: JSON.stringify(plan),
     });
     if (!response.ok) {
-      throw new Error("Erro ao criar plano");
+      const error = await response.json().catch(() => ({}));
+      throw new Error(error.message || "Erro ao criar plano");
     }
     return response.json();
   },
@@ -42,7 +43,8 @@ export const planService = {
       body: JSON.stringify(plan),
     });
     if (!response.ok) {
-      throw new Error("Erro ao atualizar plano");
+      const error = await response.json().catch(() => ({}));
+      throw new Error(error.message || "Erro ao atualizar plano");
     }
     return response.json();
   },
@@ -52,7 +54,8 @@ export const planService = {
       method: "DELETE",
     });
     if (!response.ok && response.status !== 204) {
-      throw new Error("Erro ao deletar plano");
+      const error = await response.json().catch(() => ({}));
+      throw new Error(error.message || "Erro ao deletar plano");
     }
   },
 };

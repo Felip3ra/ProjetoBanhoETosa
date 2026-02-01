@@ -1,4 +1,4 @@
-export interface Subscription {
+﻿export interface Subscription {
   id: number;
   customerName: string;
   phone: string;
@@ -34,7 +34,7 @@ export const subscriptionService = {
       }));
     } catch (error) {
       console.error("Error fetching subscriptions:", error);
-      return []; // Explicitly return an empty array on error
+      return [];
     }
   },
 
@@ -53,22 +53,14 @@ export const subscriptionService = {
   },
 
   confirmSubscriptionPayment: async (subscription: Subscription): Promise<void> => {
-    const response = await fetch(
-      `${API_BASE_URL}/Subscriptions/ConfirmPayment`,
-      {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(subscription),
-      }
-    );
+    const response = await fetch(`${API_BASE_URL}/Subscriptions/ConfirmPayment`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(subscription),
+    });
     if (!response.ok) {
-      throw new Error("Erro ao confirmar pagamento");
-    }
-    try {
-      const data = await response.json();
-      if (data?.message) alert(data.message);
-    } catch (_) {
-      // Sem corpo: seguir silenciosamente
+      const error = await response.json().catch(() => ({}));
+      throw new Error(error.message || "Erro ao confirmar pagamento");
     }
   },
 };

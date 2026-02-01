@@ -1,8 +1,14 @@
-export interface ClientPayload {
+﻿export interface ClientPayload {
   name: string;
   phone: string;
   email?: string;
   petName: string;
+}
+
+export interface ClientUpdatePayload {
+  name: string;
+  phone: string;
+  email?: string;
 }
 
 export interface ClientSummary {
@@ -35,12 +41,29 @@ export const clientService = {
       const err = await response.json().catch(() => ({}));
       throw new Error(err.message || "Erro ao cadastrar cliente");
     }
+  },
 
-    try {
-      const data = await response.json();
-      if (data?.message) alert(data.message);
-    } catch {
-      // resposta sem corpo: seguir silenciosamente
+  updateClient: async (id: number, payload: ClientUpdatePayload): Promise<void> => {
+    const response = await fetch(`${API_BASE_URL}/Clients/${id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({}));
+      throw new Error(err.message || "Erro ao atualizar cliente");
+    }
+  },
+
+  deleteClient: async (id: number): Promise<void> => {
+    const response = await fetch(`${API_BASE_URL}/Clients/${id}`, {
+      method: "DELETE",
+    });
+
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({}));
+      throw new Error(err.message || "Erro ao excluir cliente");
     }
   },
 
@@ -64,7 +87,7 @@ export const clientService = {
         activePlanExpiresAt: c.activePlanExpiresAt ?? c.ActivePlanExpiresAt,
       } as Client));
     } catch (error) {
-      console.warn("Lista de clientes indisponivel", error);
+      console.warn("Lista de clientes indisponível", error);
       return [];
     }
   },
@@ -82,7 +105,7 @@ export const clientService = {
       };
     } catch (error) {
       // Se banco estiver vazio ou a API devolver erro/controlado, garanta zeros
-      console.warn("Resumo de clientes indisponivel, usando zeros", error);
+      console.warn("Resumo de clientes indisponível, usando zeros", error);
       return { totalClients: 0, totalPets: 0 };
     }
   },

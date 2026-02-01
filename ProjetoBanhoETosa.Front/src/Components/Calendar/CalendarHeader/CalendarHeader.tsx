@@ -1,6 +1,6 @@
-import { Calendar, ChevronLeft, ChevronRight, Plus } from "lucide-react";
-import style from "./CalendarHeader.module.css";
+﻿import { Calendar, ChevronLeft, ChevronRight, Plus } from "lucide-react";
 import type { CalendarHeaderProps } from "../../../interfaces/CalendarHeader";
+import { Button } from "../../ui/button";
 
 export default function CalendarHeader({
   currentDate,
@@ -9,27 +9,26 @@ export default function CalendarHeader({
   onAddAppointment,
 }: CalendarHeaderProps) {
   return (
-    <div className={style['Container-Calendar-Header']}>
-      <div className={style['Container-buttons']}>
-        <button onClick={onPrevMonth} className={style['Button-Prev-Month']}>
-          <ChevronLeft className={style['Icon-ChevronLeft']}/>
-        </button>
-        <h2 className={style['Container-buttons-Tittle']}>
-          <Calendar className={style['Icon-Calendar']}/>
-          {currentDate.toLocaleDateString("pt-BR", { month: "long", year: "numeric" }).toUpperCase()}
-        </h2>
-        <button onClick={onNextMonth} className={style['Button-Next-Month']}>
-          <ChevronRight className={style['Icon-ChevronRight']} />
-        </button>
+    <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+      <div className="flex items-center gap-3">
+        <Button type="button" variant="outline" size="icon" onClick={onPrevMonth} aria-label="Mês anterior">
+          <ChevronLeft className="h-4 w-4" />
+        </Button>
+        <div className="flex items-center gap-2 text-lg font-semibold text-slate-900">
+          <Calendar className="h-4 w-4 text-slate-500" />
+          <span className="tracking-wide">
+            {currentDate.toLocaleDateString("pt-BR", { month: "long", year: "numeric" }).toUpperCase()}
+          </span>
+        </div>
+        <Button type="button" variant="outline" size="icon" onClick={onNextMonth} aria-label="Próximo mês">
+          <ChevronRight className="h-4 w-4" />
+        </Button>
       </div>
 
-      <button
-        onClick={onAddAppointment}
-        className={style['Button-Add-Appointment']}
-      >
-        <Plus className={style['Icon-Plus']}/>
+      <Button type="button" variant="brand" onClick={onAddAppointment}>
+        <Plus className="h-4 w-4" />
         Novo Agendamento
-      </button>
+      </Button>
     </div>
   );
 }

@@ -1,45 +1,49 @@
-import { Scissors, Dog, Edit2 } from "lucide-react";
+﻿import { Scissors, Dog, Edit2 } from "lucide-react";
 import type { PricingListProps } from "../../interfaces/PricingList";
+import { Button } from "../ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 
-export default function PricingList({ services,OpenModalEdit }: PricingListProps) {
-  // Ícone por serviço
+export default function PricingList({ services, OpenModalEdit }: PricingListProps) {
   const getIcon = (name: string) => {
-    if (name.toLowerCase().includes("banho") && name.toLowerCase().includes("tosa")) return <Scissors className="w-5 h-5 text-purple-600" />;
-    if (name.toLowerCase().includes("banho")) return <Dog className="w-5 h-5 text-blue-600" />;
-    if (name.toLowerCase().includes("tosa")) return <Scissors className="w-5 h-5 text-orange-600" />;
+    if (name.toLowerCase().includes("banho") && name.toLowerCase().includes("tosa")) {
+      return <Scissors className="h-5 w-5 text-purple-600" />;
+    }
+    if (name.toLowerCase().includes("banho")) return <Dog className="h-5 w-5 text-blue-600" />;
+    if (name.toLowerCase().includes("tosa")) return <Scissors className="h-5 w-5 text-orange-600" />;
     return null;
   };
 
-  // Cor por serviço
   const getColor = (name: string) => {
     if (name.toLowerCase().includes("banho") && name.toLowerCase().includes("tosa")) return "text-purple-600";
     if (name.toLowerCase().includes("banho")) return "text-blue-600";
     if (name.toLowerCase().includes("tosa")) return "text-orange-600";
-    return "text-gray-600";
+    return "text-slate-600";
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-sm p-6">
-      <div className="flex justify-between mb-3 items-start">
-        <h3 className="font-bold text-gray-800 mb-4">Tabela de Preços</h3>
-        {/* O botão de edição deve ser controlado pelo componente pai */}
-        <button onClick={OpenModalEdit} className="text-blue-600 hover:text-blue-700">
-          <Edit2 className="w-4 h-4" />
-        </button>
-      </div>
-      <div className="space-y-3">
-        {services.map(service => (
-          <div key={service.id} className="flex items-center justify-between p-3 rounded-lg bg-gray-50">
+    <Card>
+      <CardHeader className="flex flex-row items-start justify-between space-y-0">
+        <div>
+          <CardTitle>Tabela de Preços</CardTitle>
+          <p className="text-sm text-slate-500">Valores atualizados por serviço</p>
+        </div>
+        <Button variant="ghost" size="icon" onClick={OpenModalEdit} aria-label="Editar preços">
+          <Edit2 className="h-4 w-4" />
+        </Button>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        {services.map((service) => (
+          <div key={service.id} className="flex items-center justify-between rounded-xl border border-slate-200 bg-white px-4 py-3">
             <div className="flex items-center gap-2">
               {getIcon(service.name)}
-              <span className="text-gray-700">{service.name}</span>
+              <span className="text-slate-700">{service.name}</span>
             </div>
-            <span className={`font-bold ${getColor(service.name)}`}>
+            <span className={`text-base font-semibold ${getColor(service.name)}`}>
               R$ {service.price.toFixed(2)}
             </span>
           </div>
         ))}
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 }

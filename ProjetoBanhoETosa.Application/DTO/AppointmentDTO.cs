@@ -34,7 +34,9 @@ namespace ProjetoBanhoETosa.Application.DTO
 
         // Campos internos (não vindos diretamente do front)
         public int ServiceId { get; set; }
+        [JsonIgnore]
         public DateTime AppointmentDate { get; set; }
+        [JsonIgnore]
         public TimeOnly AppointmentTime { get; set; }
         [JsonIgnore]
         public PaymentMethod PaymentMethod { get; set; }

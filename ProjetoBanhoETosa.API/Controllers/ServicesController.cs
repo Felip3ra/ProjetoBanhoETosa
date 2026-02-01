@@ -1,7 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Hosting;
 using ProjetoBanhoETosa.Application;
 using ProjetoBanhoETosa.Application.DTO;
 using ProjetoBanhoETosa.Domain.Models;
+using ProjetoBanhoETosa.Infrastructure.Context;
 
 namespace ProjetoBanhoETosa.Presentation.Controllers
 {
@@ -9,18 +11,40 @@ namespace ProjetoBanhoETosa.Presentation.Controllers
     public class ServicesController : Controller
     {
         private readonly IService<ServiceDTO, Service> _serviceService;
+        private readonly AppDbContext _context;
+        private readonly ILogger<ServicesController> _logger;
+        private readonly IWebHostEnvironment _environment;
 
-        public ServicesController(IService<ServiceDTO, Service> serviceService)
+        public ServicesController(
+            IService<ServiceDTO, Service> serviceService,
+            AppDbContext context,
+            ILogger<ServicesController> logger,
+            IWebHostEnvironment environment)
         {
             _serviceService = serviceService;
+            _context = context;
+            _logger = logger;
+            _environment = environment;
         }
 
         [HttpGet("GetAllServices")]
         public async Task<IActionResult> GetAllServices()
         {
-            var services = await _serviceService.GetAllAsync();
-            var list = services?.ToList() ?? new List<ServiceDTO>();
-            return Ok(new { message = "Servicos encontrados", Services = list });
+            try
+            {
+                var services = await _serviceService.GetAllAsync();
+                var list = services?.ToList() ?? new List<ServiceDTO>();
+                return Ok(new { message = "Servicos encontrados", Services = list });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao buscar servicos");
+                return StatusCode(500, new
+                {
+                    message = "Erro ao carregar servicos.",
+                    details = _environment.IsDevelopment() ? ex.InnerException?.Message ?? ex.Message : null
+                });
+            }
         }
 
         [HttpPut("UpdateService/{id}")]
@@ -29,20 +53,32 @@ namespace ProjetoBanhoETosa.Presentation.Controllers
             if (newPrice <= 0)
                 return BadRequest(new { message = "Preco invalido." });
 
-            var existingService = await _serviceService.GetByIdAsync(id);
-            if (existingService == null)
-                return NotFound(new { message = "Servico nao encontrado." });
-
-            existingService.Price = newPrice;
-            var updated = await _serviceService.UpdateAsync(existingService);
-            if (!updated)
-                return StatusCode(500, new { message = "Erro ao atualizar o preco do servico." });
-
-            return Ok(new
+            try
             {
-                message = "Preco atualizado com sucesso!",
-                service = existingService
-            });
+                var existingService = await _context.Services.FindAsync(id);
+                if (existingService == null)
+                    return NotFound(new { message = "Servico nao encontrado." });
+
+                existingService.Price = newPrice;
+                existingService.updated_at = DateTime.Now;
+
+                await _context.SaveChangesAsync();
+
+                return Ok(new
+                {
+                    message = "Preco atualizado com sucesso!",
+                    service = existingService
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao atualizar preco do servico {ServiceId}", id);
+                return StatusCode(500, new
+                {
+                    message = "Erro ao atualizar o preco do servico.",
+                    details = _environment.IsDevelopment() ? ex.InnerException?.Message ?? ex.Message : null
+                });
+            }
         }
 
         [HttpPost("CreateService")]
@@ -51,17 +87,29 @@ namespace ProjetoBanhoETosa.Presentation.Controllers
             if (service == null || string.IsNullOrWhiteSpace(service.Name) || service.Price <= 0 || service.DurationInMinutes <= 0)
                 return BadRequest(new { message = "Dados do servico invalidos." });
 
-            var added = await _serviceService.AddAsync(service);
-            if (!added)
-                return StatusCode(500, new { message = "Erro ao cadastrar o servico." });
-
-            var created = await _serviceService.GetByCondition(s => s.Name == service.Name);
-
-            return CreatedAtAction(nameof(GetAllServices), new { id = created?.Id ?? service.Id }, new
+            try
             {
-                message = "Servico cadastrado com sucesso!",
-                service = created ?? service
-            });
+                var added = await _serviceService.AddAsync(service);
+                if (!added)
+                    return StatusCode(500, new { message = "Erro ao cadastrar o servico." });
+
+                var created = await _serviceService.GetByCondition(s => s.Name == service.Name);
+
+                return CreatedAtAction(nameof(GetAllServices), new { id = created?.Id ?? service.Id }, new
+                {
+                    message = "Servico cadastrado com sucesso!",
+                    service = created ?? service
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao cadastrar servico");
+                return StatusCode(500, new
+                {
+                    message = "Erro ao cadastrar o servico.",
+                    details = _environment.IsDevelopment() ? ex.InnerException?.Message ?? ex.Message : null
+                });
+            }
         }
 
         [HttpDelete("DeleteService/{id}")]
@@ -70,11 +118,23 @@ namespace ProjetoBanhoETosa.Presentation.Controllers
             if (id <= 0)
                 return BadRequest(new { message = "Id invalido." });
 
-            var deleted = await _serviceService.DeleteAsync(id);
-            if (!deleted)
-                return NotFound(new { message = "Servico nao encontrado." });
+            try
+            {
+                var deleted = await _serviceService.DeleteAsync(id);
+                if (!deleted)
+                    return NotFound(new { message = "Servico nao encontrado." });
 
-            return NoContent();
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao deletar servico {ServiceId}", id);
+                return StatusCode(500, new
+                {
+                    message = "Erro ao deletar o servico.",
+                    details = _environment.IsDevelopment() ? ex.InnerException?.Message ?? ex.Message : null
+                });
+            }
         }
     }
 }

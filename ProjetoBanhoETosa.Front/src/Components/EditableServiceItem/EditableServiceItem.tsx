@@ -1,6 +1,8 @@
-import React, { useState } from "react";
-import { Edit2, Check, Trash2 } from "lucide-react";
-import styles from "./EditableServiceItem.module.css";
+﻿import { useState } from "react";
+import { Check, Edit2, Trash2 } from "lucide-react";
+import { Button } from "../ui/button";
+import { Input } from "../ui/input";
+import { useToast } from "../common/ToastProvider";
 
 interface Service {
   id: number;
@@ -16,9 +18,10 @@ interface EditableServiceItemProps {
 }
 
 export default function EditableServiceItem({ service, onSaveItem, onDelete }: EditableServiceItemProps) {
+  const { pushToast } = useToast();
   const safePrice = typeof service?.price === "number" && !Number.isNaN(service.price) ? service.price : 0;
-  const [isEditing, setIsEditing] = useState<boolean>(false);
-  const [tempPrice, setTempPrice] = useState<string>(safePrice.toString());
+  const [isEditing, setIsEditing] = useState(false);
+  const [tempPrice, setTempPrice] = useState(safePrice.toString());
 
   const startEdit = () => {
     setIsEditing(true);
@@ -27,13 +30,13 @@ export default function EditableServiceItem({ service, onSaveItem, onDelete }: E
 
   const handleSave = () => {
     if (!tempPrice) {
-      alert("Por favor, insira um preço válido!");
+      pushToast({ message: "Por favor, insira um preço válido.", variant: "error" });
       return;
     }
 
     const price = Number(tempPrice.replace(",", "."));
-    if (isNaN(price) || price <= 0) {
-      alert("Por favor, insira um preço válido!");
+    if (Number.isNaN(price) || price <= 0) {
+      pushToast({ message: "Por favor, insira um preço válido.", variant: "error" });
       return;
     }
 
@@ -47,61 +50,48 @@ export default function EditableServiceItem({ service, onSaveItem, onDelete }: E
   };
 
   return (
-    <div className={styles["Container-Service-Item"]}>
-      <div className={styles["Container-Service-Item-Box"]}>
+    <div className="rounded-xl border border-slate-200 bg-white p-4">
+      <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <div>
-          <h4 className={styles["Label-Service-Name"]}>{service.name}</h4>
-          <span className={styles["Label-Service-Duration"]}>{service.durationInMinutes} min</span>
+          <h4 className="font-semibold text-slate-900">{service.name}</h4>
+          <span className="text-sm text-slate-500">{service.durationInMinutes} min</span>
         </div>
+
         {isEditing ? (
-          <div className={styles["Container-Input"]}>
+          <div className="flex flex-wrap items-center gap-2">
             <div className="relative">
-              <span className={styles["Label-Price-Prefix"]}>R$</span>
-              <input
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-slate-500">R$</span>
+              <Input
                 type="number"
-                value={tempPrice || ""}
+                value={tempPrice}
                 onChange={(e) => setTempPrice(e.target.value)}
-                className={styles["Input-Price"]}
+                className="w-28 pl-8"
                 step="0.01"
                 min="0"
                 autoFocus
               />
             </div>
-            <button
-              onClick={handleSave}
-              className={styles["Button-Save"]}
-              aria-label={`Salvar preço de ${service.name}`}
-            >
-              <Check className={styles["Icon-Check"]} />
+            <Button type="button" variant="brand" size="sm" onClick={handleSave}>
+              <Check className="h-4 w-4" />
               Salvar
-            </button>
-            <button onClick={handleCancel} className={styles["Button-Cancel"]}>
+            </Button>
+            <Button type="button" variant="outline" size="sm" onClick={handleCancel}>
               Cancelar
-            </button>
+            </Button>
           </div>
         ) : (
-          <div className={styles["Container-Button-Edit"]}>
-            <span className={styles["Label-Price"]}>R$ {safePrice.toFixed(2)}</span>
-            <div className={styles["Container-Actions"]}>
-              <button
-                onClick={startEdit}
-                className={styles["Button-Edit"]}
-                aria-label={`Editar preço de ${service.name}`}
-              >
-                <Edit2 className={styles["Icon-Edit"]} />
-                Editar
-              </button>
-              {onDelete && (
-                <button
-                  onClick={() => onDelete(service.id)}
-                  className={styles["Button-Delete"]}
-                  aria-label={`Excluir ${service.name}`}
-                >
-                  <Trash2 className={styles["Icon-Delete"]} />
-                  Excluir
-                </button>
-              )}
-            </div>
+          <div className="flex flex-wrap items-center gap-3">
+            <span className="text-lg font-semibold text-slate-900">R$ {safePrice.toFixed(2)}</span>
+            <Button type="button" variant="ghost" size="sm" onClick={startEdit}>
+              <Edit2 className="h-4 w-4" />
+              Editar
+            </Button>
+            {onDelete && (
+              <Button type="button" variant="ghost" size="sm" onClick={() => onDelete(service.id)}>
+                <Trash2 className="h-4 w-4" />
+                Excluir
+              </Button>
+            )}
           </div>
         )}
       </div>

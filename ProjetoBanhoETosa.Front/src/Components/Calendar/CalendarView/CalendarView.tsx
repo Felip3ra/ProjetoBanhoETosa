@@ -1,8 +1,7 @@
-import React, { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
 import CalendarHeader from "../CalendarHeader/CalendarHeader";
 import CalendarGrid from "../CalendarGrid/CalendarGrid";
 import AppointmentList from "../../AppointmentList/AppointmentList";
-import type { Appointment } from "../../../interfaces/Appointment";
 import AddAppointmentModal from "../../modals/AddAppointmentModal/AddAppointmentModal";
 import EditingPriceServices from "../../modals/EditingPriceServices/EditingPriceServices";
 import PlanManagement from "../../modals/PlanManagement/PlanManagement";
@@ -10,17 +9,17 @@ import MonthResume from "../../MonthResume/MonthResume";
 import PricingList from "../../PricingList/PricingList";
 import AmountMothServices from "../../modals/AmountMonthServices/AmountMonthServices";
 import Header from "../../Header/Header";
-import style from "./CalendarView.module.css";
 import { useAppointments } from "../../../hooks/useAppointments";
 import { useServices } from "../../../hooks/useServices";
 import { useSubscriptions } from "../../../hooks/useSubscriptions";
 import { useCalendar } from "../../../hooks/useCalendar";
 import { useNewAppointmentForm } from "../../../hooks/useNewAppointmentForm";
 import LoadingSpinner from "../../common/LoadingSpinner"; // Import the new LoadingSpinner component
+import { useToast } from "../../common/ToastProvider";
 import { useClients } from "../../../hooks/useClients";
-import { AddClientModal } from "../../modals/AddClientModal/AddClientModal";
 import ClientSummary from "../../ClientSummary/ClientSummary";
 import type { Client } from "../../../services/clientService";
+import { useNavigate } from "react-router-dom";
 
 type CalendarViewProps = {
   userName?: string;
@@ -42,9 +41,9 @@ type Subscription = {
 export default function CalendarView({ userName, onLogout }: CalendarViewProps) {
   const [ShowEditPricesModal, setShowEditPricesModal] = useState(false);
   const [showSubscriptionsModal, setShowSubscriptionsModal] = useState(false);
-  const [showAddClientModal, setShowAddClientModal] = useState(false);
   const [autoPlanApplied, setAutoPlanApplied] = useState(false);
-  const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
+  const { pushToast } = useToast();
+  const navigate = useNavigate();
 
   const [showAddModal, setShowAddModal] = useState(false);
 
@@ -65,14 +64,7 @@ export default function CalendarView({ userName, onLogout }: CalendarViewProps) 
   const subscriptions = subscriptionsFromHook || []; // Defensive check
   const { currentDate, selectedDate, changeMonth, generateMonthDays, setSelectedDate } = useCalendar();
   const { newAppointment, setNewAppointment, handleServiceChange, resetForm } = useNewAppointmentForm(services, selectedDate);
-  const { summary: clientSummary, clients, loading: loadingClients, saving: savingClient, error: errorClients, createClient, refetchSummary, refetchClients } = useClients();
-
-  useEffect(() => {
-    if (!toast) return;
-    const timer = setTimeout(() => setToast(null), 5000);
-    return () => clearTimeout(timer);
-  }, [toast]);
-
+  const { summary: clientSummary, clients, loading: loadingClients, error: errorClients, refetchSummary, refetchClients } = useClients();
 
   useEffect(() => {
     // Refetch all data when component mounts or a relevant action occurs
@@ -86,16 +78,28 @@ export default function CalendarView({ userName, onLogout }: CalendarViewProps) 
   const handleUpdateServicePrice = async (serviceId: number, newPrice: number) => {
     const success = await updateServicePrice(serviceId, newPrice);
     if (success) {
-      // refetchServices(); // Re-fetch services to ensure UI is updated
+      pushToast({ message: "Preço atualizado com sucesso.", variant: "success" });
+    } else {
+      pushToast({ message: "Não foi possível atualizar o preço.", variant: "error" });
     }
   };
 
   const handleCreateService = async (service: { name: string; price: number; durationInMinutes: number }) => {
-    await addService(service);
+    const success = await addService(service);
+    if (success) {
+      pushToast({ message: "Serviço cadastrado com sucesso.", variant: "success" });
+    } else {
+      pushToast({ message: "Não foi possível cadastrar o serviço.", variant: "error" });
+    }
   };
 
   const handleDeleteService = async (serviceId: number) => {
-    await deleteService(serviceId);
+    const success = await deleteService(serviceId);
+    if (success) {
+      pushToast({ message: "Serviço removido com sucesso.", variant: "success" });
+    } else {
+      pushToast({ message: "Não foi possível remover o serviço.", variant: "error" });
+    }
   };
 
   // Adicionar agendamento
@@ -106,39 +110,54 @@ export default function CalendarView({ userName, onLogout }: CalendarViewProps) 
       !newAppointment.date ||
       !newAppointment.time
     ) {
-      alert("Preencha todos os campos obrigatórios!");
+      pushToast({ message: "Preencha todos os campos obrigatórios.", variant: "error" });
       return;
     }
+
+    if (newAppointment.paymentMethod === "Plano Mensal" || newAppointment.subscriptionId) {
+      const activeSub =
+        subscriptions.find((sub) => sub.id === newAppointment.subscriptionId) ||
+        findActiveSubscriptionForClient(newAppointment.owner);
+
+      if (!activeSub) {
+        pushToast({ message: "Assinatura ativa não encontrada ou sem serviços disponíveis.", variant: "error" });
+        return;
+      }
+
+      if (activeSub.servicesUsed >= activeSub.servicesAvailable) {
+        pushToast({ message: "Limite de serviços do plano atingido.", variant: "error" });
+        return;
+      }
+    }
+
     const success = await addAppointment({ ...newAppointment, date: selectedDate });
     if (success) {
       setShowAddModal(false);
       resetForm(); // Use resetForm from the hook
       setAutoPlanApplied(false);
-      setToast({ message: "Agendamento criado com sucesso", type: "success" });
+      await refetchSubscriptions();
+      pushToast({ message: "Agendamento criado com sucesso.", variant: "success" });
     } else {
-      setToast({ message: "N\u00e3o foi poss\u00edvel criar o agendamento", type: "error" });
+      pushToast({ message: "Não foi possível criar o agendamento.", variant: "error" });
     }
   };
 
   // Excluir agendamento
   const handleDeleteAppointment = async (id: number) => {
-    await deleteAppointment(id);
+    const success = await deleteAppointment(id);
+    if (success) {
+      pushToast({ message: "Agendamento excluído.", variant: "success" });
+    }
   };
 
   // Confirmar pagamento de assinatura
   const handleConfirmSubscriptionPayment = async (subscription: Subscription) => {
     const success = await confirmSubscriptionPayment(subscription);
     if (success) {
-      // refetchSubscriptions(); // Re-fetch subscriptions to ensure UI is updated
+      pushToast({ message: "Pagamento confirmado com sucesso.", variant: "success" });
+    } else {
+      pushToast({ message: "Não foi possível confirmar o pagamento.", variant: "error" });
     }
-  };
-
-  const handleAddClient = async (payload: { name: string; phone: string; email?: string; petName: string }) => {
-    const success = await createClient(payload);
-    if (success) {
-      setShowAddClientModal(false);
-    }
-    return success;
   };
 
   const handleChangeServiceKeepingPlan = (serviceName: string) => {
@@ -188,13 +207,15 @@ export default function CalendarView({ userName, onLogout }: CalendarViewProps) 
     const client = clients.find((c: Client) => c.id === clientId);
     if (!client) return;
 
-    const activeSub = findActiveSubscriptionForClient(client.name);
-    const hasPlan = Boolean(activeSub || client.activeSubscriptionId);
+    const activeSub =
+      findActiveSubscriptionForClient(client.name) ||
+      subscriptions.find((sub) => sub.id === client.activeSubscriptionId);
+    const hasPlan = Boolean(activeSub);
 
     setNewAppointment((prev) => ({
       ...prev,
       clientId: client.id,
-      subscriptionId: activeSub?.id ?? client.activeSubscriptionId,
+      subscriptionId: activeSub?.id,
       owner: client.name,
       phone: client.phone || prev.phone,
       petName: client.petName || prev.petName,
@@ -236,26 +257,17 @@ export default function CalendarView({ userName, onLogout }: CalendarViewProps) 
       <Header
         onEditPrices={() => setShowEditPricesModal(true)}
         onShowPlans={() => setShowSubscriptionsModal(true)}
-        onShowClients={() => setShowAddClientModal(true)}
+        onShowClients={() => navigate("/Clientes")}
+        onShowSubscriptionsPage={() => navigate("/Assinaturas")}
         userName={userName}
         onLogout={onLogout}
       />
 
-      {toast && (
-        <div
-          className={`fixed top-4 right-4 z-50 px-4 py-3 rounded-lg shadow-lg text-white transition-opacity ${
-            toast.type === "success" ? "bg-green-600" : "bg-red-600"
-          }`}
-        >
-          {toast.message}
-        </div>
-      )}
-
       {isLoading ? (
         <LoadingSpinner />
       ) : (
-        <div className={style["Container-Calendar-View"]}>
-          <div className={style["Container-Calendar-Main-Column"]}>
+        <div className="mx-auto grid max-w-7xl grid-cols-1 gap-6 px-4 py-8 lg:grid-cols-3">
+          <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm lg:col-span-2">
             <CalendarHeader
               currentDate={currentDate}
               onPrevMonth={() => changeMonth(-1)}
@@ -326,13 +338,9 @@ export default function CalendarView({ userName, onLogout }: CalendarViewProps) 
         />
       )}
 
-      <AddClientModal
-        show={showAddClientModal}
-        onClose={() => setShowAddClientModal(false)}
-        onSubmit={handleAddClient}
-        isSubmitting={savingClient}
-        error={errorClients}
-      />
     </div>
   );
 }
+
+
+

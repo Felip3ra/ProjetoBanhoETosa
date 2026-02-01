@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+﻿import { useState, useEffect, useCallback } from "react";
 import { serviceService } from "../services/serviceService";
 
 interface Service {
@@ -30,9 +30,7 @@ export const useServices = (): UseServices => {
     setError(null);
     try {
       const fetchedServices = await serviceService.getAllServices();
-      const unique = Array.from(
-        new Map(fetchedServices.map((s) => [s.id, s])).values()
-      );
+      const unique = Array.from(new Map(fetchedServices.map((s) => [s.id, s])).values());
       setServices(unique);
     } catch (err: any) {
       console.error("Failed to fetch services:", err);
@@ -46,53 +44,57 @@ export const useServices = (): UseServices => {
     fetchServices();
   }, [fetchServices]);
 
-  const updateServicePrice = useCallback(async (serviceId: number, newPrice: number): Promise<boolean> => {
-    if (isNaN(newPrice) || newPrice <= 0) {
-      alert("Por favor, insira um preço válido!");
-      return false;
-    }
+  const updateServicePrice = useCallback(
+    async (serviceId: number, newPrice: number): Promise<boolean> => {
+      if (isNaN(newPrice) || newPrice <= 0) {
+        return false;
+      }
 
-    setIsUpdating(true);
-    setError(null);
-    try {
-      await serviceService.updateServicePrice(serviceId, newPrice);
-      setServices((prev) => prev.map((s) => (s.id === serviceId ? { ...s, price: newPrice } : s)));
-      await fetchServices();
-      return true;
-    } catch (err: any) {
-      console.error("Failed to update service price:", err);
-      setError(err.message || "Erro ao atualizar o serviço!");
-      return false;
-    } finally {
-      setIsUpdating(false);
-    }
-  }, [fetchServices]);
+      setIsUpdating(true);
+      setError(null);
+      try {
+        await serviceService.updateServicePrice(serviceId, newPrice);
+        setServices((prev) => prev.map((s) => (s.id === serviceId ? { ...s, price: newPrice } : s)));
+        await fetchServices();
+        return true;
+      } catch (err: any) {
+        console.error("Failed to update service price:", err);
+        setError(err.message || "Erro ao atualizar o serviço!");
+        return false;
+      } finally {
+        setIsUpdating(false);
+      }
+    },
+    [fetchServices]
+  );
 
-  const addService = useCallback(async (service: Omit<Service, "id">): Promise<boolean> => {
-    if (!service.name || service.price <= 0 || service.durationInMinutes <= 0) {
-      alert("Preencha nome, preço e duração válidos.");
-      return false;
-    }
+  const addService = useCallback(
+    async (service: Omit<Service, "id">): Promise<boolean> => {
+      if (!service.name || service.price <= 0 || service.durationInMinutes <= 0) {
+        return false;
+      }
 
-    setIsUpdating(true);
-    setError(null);
-    try {
-      const created = await serviceService.createService(service);
-      setServices((prev) => {
-        const next = new Map(prev.map((s) => [s.id, s]));
-        next.set(created.id, created);
-        return Array.from(next.values());
-      });
-      await fetchServices();
-      return true;
-    } catch (err: any) {
-      console.error("Failed to create service:", err);
-      setError(err.message || "Erro ao criar serviço!");
-      return false;
-    } finally {
-      setIsUpdating(false);
-    }
-  }, [fetchServices]);
+      setIsUpdating(true);
+      setError(null);
+      try {
+        const created = await serviceService.createService(service);
+        setServices((prev) => {
+          const next = new Map(prev.map((s) => [s.id, s]));
+          next.set(created.id, created);
+          return Array.from(next.values());
+        });
+        await fetchServices();
+        return true;
+      } catch (err: any) {
+        console.error("Failed to create service:", err);
+        setError(err.message || "Erro ao criar serviço!");
+        return false;
+      } finally {
+        setIsUpdating(false);
+      }
+    },
+    [fetchServices]
+  );
 
   const deleteService = useCallback(async (serviceId: number): Promise<boolean> => {
     if (!serviceId) return false;

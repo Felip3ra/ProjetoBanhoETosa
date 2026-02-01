@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata;
 using ProjetoBanhoETosa.Domain.Repository;
 using ProjetoBanhoETosa.Infrastructure.Context;
 using System;
@@ -95,7 +96,23 @@ namespace ProjetoBanhoETosa.Infrastructure.Repository
         {
             try
             {
-                _context.Set<T>().Update(entity);
+                var entry = _context.Entry(entity);
+                if (entry.State == EntityState.Detached)
+                {
+                    var entityType = _context.Model.FindEntityType(typeof(T));
+                    var keyProperties = entityType?.FindPrimaryKey()?.Properties;
+                    if (keyProperties != null && keyProperties.Count > 0)
+                    {
+                        var localEntity = _context.Set<T>().Local.FirstOrDefault(local => KeysMatch(local, entity, keyProperties));
+                        if (localEntity != null)
+                        {
+                            _context.Entry(localEntity).State = EntityState.Detached;
+                        }
+                    }
+                    _context.Set<T>().Attach(entity);
+                }
+
+                entry.State = EntityState.Modified;
                 await _context.SaveChangesAsync();
                 return true;
             }
@@ -103,6 +120,22 @@ namespace ProjetoBanhoETosa.Infrastructure.Repository
             {
                 return false;
             }
+        }
+
+        private static bool KeysMatch(T left, T right, IReadOnlyList<IProperty> keyProperties)
+        {
+            foreach (var keyProperty in keyProperties)
+            {
+                var propertyInfo = keyProperty.PropertyInfo;
+                if (propertyInfo == null) return false;
+
+                var leftValue = propertyInfo.GetValue(left);
+                var rightValue = propertyInfo.GetValue(right);
+                if (leftValue == null || rightValue == null) return false;
+                if (!leftValue.Equals(rightValue)) return false;
+            }
+
+            return true;
         }
     }
 }

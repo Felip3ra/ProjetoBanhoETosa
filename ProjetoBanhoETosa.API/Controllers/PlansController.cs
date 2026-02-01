@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using ProjetoBanhoETosa.Application;
 using ProjetoBanhoETosa.Application.DTO;
@@ -9,9 +10,11 @@ namespace ProjetoBanhoETosa.Presentation.Controllers
     public class PlansController : Controller
     {
         private readonly IService<PlanDTO, Plan> _planService;
-        public PlansController(IService<PlanDTO, Plan> planService)
+        private readonly IWebHostEnvironment _environment;
+        public PlansController(IService<PlanDTO, Plan> planService, IWebHostEnvironment environment)
         {
             _planService = planService;
+            _environment = environment;
         }
 
         [HttpGet("GetAllPlans")]
@@ -50,6 +53,9 @@ namespace ProjetoBanhoETosa.Presentation.Controllers
         [HttpPut("UpdatePlan/{id:int}")]
         public async Task<IActionResult> UpdatePlan(int id, [FromBody] PlanDTO plan)
         {
+            if (plan == null)
+                return BadRequest(new { message = "Dados invalidos" });
+
             var current = await _planService.GetByIdAsync(id);
             if (current == null)
                 return NotFound(new { message = "Plano nao encontrado" });
@@ -59,10 +65,19 @@ namespace ProjetoBanhoETosa.Presentation.Controllers
             current.Price = plan.Price > 0 ? plan.Price : current.Price;
             current.ServicesAvailable = plan.ServicesAvailable > 0 ? plan.ServicesAvailable : current.ServicesAvailable;
 
-            var updated = await _planService.UpdateAsync(current);
-            if (!updated) return StatusCode(500, new { message = "Erro ao atualizar o plano" });
+            try
+            {
+                var updated = await _planService.UpdateAsync(current);
+                if (!updated)
+                    return StatusCode(500, new { message = "Erro ao atualizar o plano" });
 
-            return Ok(current);
+                return Ok(current);
+            }
+            catch (Exception ex)
+            {
+                var details = _environment.IsDevelopment() ? ex.Message : null;
+                return StatusCode(500, new { message = "Erro ao atualizar o plano", details });
+            }
         }
 
         [HttpDelete("DeletePlan/{id:int}")]
