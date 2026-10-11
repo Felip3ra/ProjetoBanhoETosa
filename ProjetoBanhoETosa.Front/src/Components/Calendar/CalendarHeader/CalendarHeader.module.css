@@ -1,0 +1,28 @@
+@import "tailwindcss";
+
+.Container-Calendar-Header{
+    @apply flex justify-between items-center mb-6;
+}
+
+.Container-buttons{
+    @apply flex items-center gap-4;
+}
+
+.Button-Prev-Month, .Button-Next-Month{
+    @apply p-2 hover:bg-gray-100 rounded-lg;
+}
+.Container-buttons-Tittle{
+    @apply text-xl font-bold text-gray-800 flex items-center gap-2;
+}
+.Icon-ChevronLeft,.Icon-ChevronRight{
+    @apply w-5 h-5;
+}
+.Icon-Calendar{
+    @apply w-6 h-6 text-blue-600;
+}
+.Button-Add-Appointment{
+    @apply flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700;
+}
+.Icon-Plus{
+    @apply w-4 h-4;
+}

@@ -1,0 +1,69 @@
+@import "tailwindcss";
+
+.Container{
+    @apply fixed inset-0 flex items-center justify-center p-4 z-[99999];
+}
+.Container-Background{
+    @apply absolute inset-0 bg-black opacity-50;
+}
+.Container-Modal-Plan{
+    @apply relative bg-white rounded-xl shadow-2xl p-6 w-full max-w-2xl max-h-screen overflow-y-auto z-10;
+}
+.Container-Header-Modal-Plan{
+    @apply flex justify-between items-center mb-4;
+}
+.Container-Header-Modal-Plan-Tittle{
+    @apply text-xl font-bold text-gray-800 text-center;
+}
+
+.Button-New-Plan{
+    @apply flex items-center gap-2 bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700;
+}
+
+.Icon-Plus{
+    @apply w-4 h-4;
+}
+
+.Button-Close{
+    @apply w-full px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors mt-4;
+}
+
+.FormPanel{
+    @apply border border-gray-200 rounded-xl p-4 bg-gray-50/80 shadow-inner space-y-3;
+}
+
+.FormTitle{
+    @apply text-lg font-semibold text-gray-800;
+}
+
+.FormGrid{
+    @apply grid grid-cols-1 md:grid-cols-2 gap-4;
+}
+
+.Field{
+    @apply flex flex-col gap-1;
+}
+
+.Label{
+    @apply text-sm font-medium text-gray-700;
+}
+
+.Input{
+    @apply w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition;
+}
+
+.Hint{
+    @apply text-xs text-gray-500;
+}
+
+.PrimaryButton{
+    @apply w-full bg-purple-600 text-white rounded-lg px-4 py-2 font-semibold hover:bg-purple-700 transition disabled:opacity-60;
+}
+
+.ListHeader{
+    @apply font-semibold text-gray-800;
+}
+
+.Card{
+    @apply border rounded-lg p-3 shadow-sm bg-white;
+}

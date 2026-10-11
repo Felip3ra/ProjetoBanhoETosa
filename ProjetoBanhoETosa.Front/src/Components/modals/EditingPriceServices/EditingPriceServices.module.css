@@ -1,0 +1,34 @@
+@import "tailwindcss";
+
+.Container {
+    @apply fixed inset-0 flex items-center justify-center p-4 z-[9999];
+}
+.Container-Background {
+    @apply absolute inset-0 bg-black opacity-50 z-[9998];
+}
+.Container-Modal-EditingPrice {
+    @apply relative bg-white rounded-xl shadow-2xl p-6 w-full max-w-md max-h-screen overflow-y-auto z-[9999];
+}
+.Label-EditingPrice {
+    @apply text-xl font-bold text-gray-800 mb-4;
+}
+
+.Form-New-Service {
+    @apply space-y-3 mb-6 p-4 bg-slate-50 rounded-lg border border-slate-200;
+}
+.Form-Row {
+    @apply flex flex-col gap-1;
+}
+.Label {
+    @apply text-sm font-semibold text-slate-700;
+}
+.Input {
+    @apply w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent;
+}
+.Button-Create {
+    @apply w-full bg-blue-600 text-white py-2.5 rounded-lg font-semibold hover:bg-blue-700 transition-colors;
+}
+
+.Button-Close {
+    @apply w-full px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors mt-2;
+}

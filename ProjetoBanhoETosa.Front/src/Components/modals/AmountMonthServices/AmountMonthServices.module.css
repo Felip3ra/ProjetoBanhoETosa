@@ -1,0 +1,23 @@
+@import "tailwindcss";
+
+.Container{
+    @apply bg-white rounded-xl shadow-sm p-6;
+}
+.Container-Tittle{
+    @apply font-bold text-gray-800 mb-4;
+}
+.Info-Services-1{
+    @apply flex items-center justify-between p-3 bg-purple-50 rounded-lg;
+}
+.Info-Services-2{
+    @apply flex items-center justify-between p-3 bg-blue-50 rounded-lg;
+}
+.Info-Services-3{
+    @apply flex items-center justify-between p-3 bg-orange-50 rounded-lg;
+}
+.Label-Info{
+    @apply text-gray-700;
+}
+.Label-Value{
+    @apply font-bold text-xl;
+}
