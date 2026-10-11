@@ -1,0 +1,86 @@
+# Primeira etapa de QA do backend C#: build + analise estatica.
+# Projeto atual: .NET 9, sem projetos de testes automatizados.
+# Execucao manual inicialmente. Azure Repos usa Branch policies para PRs.
+# Requer extensao SonarQube Server com tarefas @8 e service connection.
+trigger: none
+
+parameters:
+  - name: agentMode
+    displayName: 'Onde executar a pipeline'
+    type: string
+    default: MicrosoftHosted
+    values:
+      - MicrosoftHosted
+      - SelfHosted
+  - name: selfHostedPool
+    displayName: 'Pool interno (usado somente em SelfHosted)'
+    type: string
+    default: Default
+  - name: sonarProjectKey
+    displayName: 'Project Key existente no SonarQube'
+    type: string
+    default: ProjetoBanhoETosa
+
+pool:
+  ${{ if eq(parameters.agentMode, 'MicrosoftHosted') }}:
+    vmImage: windows-latest
+  ${{ if eq(parameters.agentMode, 'SelfHosted') }}:
+    name: ${{ parameters.selfHostedPool }}
+
+variables:
+  dotnetVersion: '9.0.x'
+  solution: 'ProjetoBanhoETosa.sln'
+  buildConfiguration: Release
+  sonarServiceConnection: sonarqube-qa
+
+stages:
+  - stage: QA
+    displayName: 'Qualidade do backend C#'
+    jobs:
+      - job: BuildAndAnalyze
+        timeoutInMinutes: 30
+        steps:
+          - checkout: self
+            clean: true
+            fetchDepth: 0
+
+          - task: UseDotNet@2
+            displayName: 'Instalar SDK .NET 9'
+            inputs:
+              packageType: sdk
+              version: '$(dotnetVersion)'
+
+          - task: DotNetCoreCLI@2
+            displayName: 'Restaurar dependencias'
+            inputs:
+              command: restore
+              projects: '$(solution)'
+
+          - task: SonarQubePrepare@8
+            displayName: 'Preparar analise do SonarQube'
+            inputs:
+              SonarQube: '$(sonarServiceConnection)'
+              scannerMode: dotnet
+              projectKey: '${{ parameters.sonarProjectKey }}'
+              projectName: ProjetoBanhoETosa
+              extraProperties: |
+                sonar.scanner.scanAll=false
+                sonar.qualitygate.wait=true
+                sonar.qualitygate.timeout=300
+
+          - task: DotNetCoreCLI@2
+            displayName: 'Compilar ProjetoBanhoETosa'
+            inputs:
+              command: build
+              projects: '$(solution)'
+              arguments: '--configuration $(buildConfiguration) --no-restore --no-incremental'
+
+          - task: SonarQubeAnalyze@8
+            displayName: 'Analisar codigo e aguardar Quality Gate'
+            inputs:
+              jdkversion: JAVA_HOME_21_X64
+
+          - task: SonarQubePublish@8
+            displayName: 'Publicar Quality Gate no resumo'
+            inputs:
+              pollingTimeoutSec: '300'
